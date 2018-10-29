@@ -78,8 +78,8 @@ public class SobelFilter implements Filter, Convolution {
                 //if (orientation[imageX][imageY] > this.threshHold) {
                     bufferWriter.setColor(imageX, imageY,
                             Color.hsb( Math.toDegrees( orientation[imageX][imageY] ),
-                                    targetReader.getColor(imageX, imageY).getSaturation(),
-                                    targetReader.getColor(imageX, imageY).getBrightness(),
+                                    0.0,
+                                    0.0,
                                     targetReader.getColor(imageX, imageY).getOpacity())
                     );
                 /*}
