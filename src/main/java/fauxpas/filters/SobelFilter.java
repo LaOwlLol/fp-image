@@ -73,7 +73,7 @@ public class SobelFilter implements Filter, Convolution {
                 vertSum = sumKernel(vertConvolutionKernel);
 
                 //orientation[imageX][imageY] = ((Math.atan( vertSum/horzSum ) / Math.PI) + 0.5) * Math.PI ;
-                orientation[imageX][imageY] = Math.abs(Math.atan(vertSum/horzSum));
+                orientation[imageX][imageY] = Math.atan(vertSum/horzSum);
 
                 //apply
                 //
