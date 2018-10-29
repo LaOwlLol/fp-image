@@ -64,10 +64,10 @@ public class SobelFilter implements Filter, Convolution {
                 horzSum = sumKernel(horzConvolutionKernel);
                 vertSum = sumKernel(vertConvolutionKernel);
 
-                orientation[imageX][imageY] = Math.atan( horzSum/vertSum );
+                orientation[imageX][imageY] = Math.atan( vertSum/horzSum );
 
                 //apply
-                if (orientation[imageX][imageY] > 0) {
+                if (orientation[imageX][imageY] > 0.1) {
                     bufferWriter.setColor(imageX, imageY,
                             Color.hsb( Math.toDegrees( orientation[imageX][imageY] ),
                                     0.5,
