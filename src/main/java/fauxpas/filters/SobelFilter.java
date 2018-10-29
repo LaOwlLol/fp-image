@@ -41,9 +41,9 @@ public class SobelFilter implements Filter, Convolution {
     public Image apply(Image target) {
 
         //make sure it's gray.
-        target = new GrayscaleFilter().apply(target);
+        Image grayImage = new GrayscaleFilter().apply(target);
 
-        PixelReader targetReader = target.getPixelReader();
+        PixelReader targetReader = grayImage.getPixelReader();
         WritableImage buffer = new WritableImage((int) target.getWidth(), (int) target.getHeight());
         PixelWriter bufferWriter = buffer.getPixelWriter();
         this.orientation = new double[(int) target.getWidth()][(int) target.getHeight()];
@@ -57,17 +57,16 @@ public class SobelFilter implements Filter, Convolution {
         for (int imageY = 0; imageY < target.getHeight(); ++imageY) {
             for (int imageX = 0; imageX < target.getWidth(); ++imageX) {
 
-                horzConvolutionKernel = computeKernel(target, targetReader, horzKernal, imageY, imageX);
-                vertConvolutionKernel = computeKernel(target, targetReader, vertKernal, imageY, imageX);
+                horzConvolutionKernel = computeKernel(grayImage, targetReader, horzKernal, imageY, imageX);
+                vertConvolutionKernel = computeKernel(grayImage, targetReader, vertKernal, imageY, imageX);
 
                 //sum pass;
                 horzSum = sumKernel(horzConvolutionKernel);
                 vertSum = sumKernel(vertConvolutionKernel);
 
-                //TODO this only really works on gray scale, if image is not grayscale only red channel is considered.
                 orientation[imageX][imageY] = Math.atan( vertSum / horzSum );
-                //apply
 
+                //apply
                 bufferWriter.setColor(imageX, imageY,
                       Color.hsb(orientation[imageX][imageY],
                             0.5,
