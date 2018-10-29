@@ -6,6 +6,9 @@ import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 
+import java.awt.color.ColorSpace;
+import java.util.Optional;
+
 public class SobelFilter implements Filter, Convolution {
 
     private static final int RED = 0;
@@ -14,7 +17,7 @@ public class SobelFilter implements Filter, Convolution {
     private final int WIDTH = 3;
     double[][] horzKernal;
     double[][] vertKernal;
-
+    double[][] orientation;
 
     public SobelFilter() {
         this.horzKernal = new double[WIDTH][WIDTH];
@@ -36,15 +39,20 @@ public class SobelFilter implements Filter, Convolution {
 
     @Override
     public Image apply(Image target) {
+
+        //make sure it's gray.
+        target = new GrayscaleFilter().apply(target);
+
         PixelReader targetReader = target.getPixelReader();
         WritableImage buffer = new WritableImage((int) target.getWidth(), (int) target.getHeight());
         PixelWriter bufferWriter = buffer.getPixelWriter();
+        this.orientation = new double[(int) target.getWidth()][(int) target.getHeight()];
 
         double[][][] horzConvolutionKernel;
         double[][][] vertConvolutionKernel;
 
-        double [] horzSum;
-        double [] vertSum;
+        double horzSum;
+        double vertSum;
 
         for (int imageY = 0; imageY < target.getHeight(); ++imageY) {
             for (int imageX = 0; imageX < target.getWidth(); ++imageX) {
@@ -56,14 +64,15 @@ public class SobelFilter implements Filter, Convolution {
                 horzSum = sumKernel(horzConvolutionKernel);
                 vertSum = sumKernel(vertConvolutionKernel);
 
+                //TODO this only really works on gray scale, if image is not grayscale only red channel is considered.
+                orientation[imageX][imageY] = Math.atan( vertSum / horzSum );
                 //apply
 
                 bufferWriter.setColor(imageX, imageY,
-                      new Color(
-                            Math.min(1.0, Math.sqrt( Math.pow( vertSum[RED], 2) + Math.pow(horzSum[RED], 2) )),
-                            Math.min(1.0, Math.sqrt( Math.pow( vertSum[GREEN], 2) + Math.pow(horzSum[GREEN], 2) )),
-                            Math.min(1.0, Math.sqrt( Math.pow( vertSum[BLUE], 2) + Math.pow(horzSum[BLUE], 2) )),
-                            1.0)
+                      Color.hsb(orientation[imageX][imageY],
+                            0.5,
+                            0.5,
+                            targetReader.getColor(imageX, imageY).getOpacity())
                 );
             }
         }
@@ -71,16 +80,12 @@ public class SobelFilter implements Filter, Convolution {
         return buffer;
     }
 
-    private double[] sumKernel(double[][][] tempKernal) {
-        double [] sum = new double[GREEN+1];
-        sum[RED] = 0.0;
-        sum[BLUE] = 0.0;
-        sum[GREEN] = 0.0;
+    private double sumKernel(double[][][] tempKernal) {
+        double sum = 0;
+
         for (int kernelY = 0; kernelY < WIDTH; ++kernelY ) {
             for (int kernelX = 0; kernelX < WIDTH; ++kernelX) {
-                sum[RED] += tempKernal[kernelX][kernelY][RED];
-                sum[BLUE] += tempKernal[kernelX][kernelY][BLUE];
-                sum[GREEN] += tempKernal[kernelX][kernelY][GREEN];
+                sum += tempKernal[kernelX][kernelY][0];
             }
         }
         return sum;
@@ -88,7 +93,7 @@ public class SobelFilter implements Filter, Convolution {
 
     @Override
     public double[][][] computeKernel(Image target, PixelReader targetReader, double[][] convolution, int imageY, int imageX) {
-        double[][][] tempKernel = new double[WIDTH][WIDTH][GREEN+1];
+        double[][][] tempKernel = new double[WIDTH][WIDTH][1];
 
         //multiply pass
         for (int kernelY = 0; kernelY < WIDTH; ++kernelY ) {
@@ -99,14 +104,14 @@ public class SobelFilter implements Filter, Convolution {
 
                 if ((imageX+i) > 0 && (imageX+i) < target.getWidth() &&
                       (imageY+j) > 0 && (imageY+j) < target.getHeight()) {
-                    tempKernel[kernelX][kernelY][RED] = targetReader.getColor(imageX+i,imageY+j).getRed() *
+                    tempKernel[kernelX][kernelY][0] = targetReader.getColor(imageX+i,imageY+j).getRed() *
                           convolution[kernelX][kernelY];
 
-                    tempKernel[kernelX][kernelY][BLUE] = targetReader.getColor(imageX+i,imageY+j).getBlue() *
-                          convolution[kernelX][kernelY];
+                    /*tempKernel[kernelX][kernelY][BLUE] = targetReader.getColor(imageX+i,imageY+j).getBlue() *
+                          convolution[kernelX][kernelY];*/
 
-                    tempKernel[kernelX][kernelY][GREEN] = targetReader.getColor(imageX+i,imageY+j).getGreen() *
-                          convolution[kernelX][kernelY];
+                    /*tempKernel[kernelX][kernelY][GREEN] = targetReader.getColor(imageX+i,imageY+j).getGreen() *
+                          convolution[kernelX][kernelY];*/
                 }
 
             }
