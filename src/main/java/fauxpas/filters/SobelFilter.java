@@ -69,7 +69,7 @@ public class SobelFilter implements Filter, Convolution {
                 //apply
                 if (orientation[imageX][imageY] > 0) {
                     bufferWriter.setColor(imageX, imageY,
-                            Color.hsb(orientation[imageX][imageY],
+                            Color.hsb( Math.toDegrees( orientation[imageX][imageY] ),
                                     0.5,
                                     0.5,
                                     targetReader.getColor(imageX, imageY).getOpacity())
