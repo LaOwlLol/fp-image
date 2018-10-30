@@ -15,10 +15,13 @@ public class SobelFilter implements Filter, Convolution {
     private static final int BLUE = 1;
     private static final int GREEN = 2;
     private final int WIDTH = 3;
+
     double threshHold;
     double[][] horzKernal;
     double[][] vertKernal;
     double[][] orientation;
+    private boolean preserveBrightness;
+    private boolean preserveSaturation;
 
     public SobelFilter() {
         this.horzKernal = new double[WIDTH][WIDTH];
@@ -38,11 +41,20 @@ public class SobelFilter implements Filter, Convolution {
         this.vertKernal[2][2] = 0.5;
 
         this.threshHold = 0.25;
+        this.preserveBrightness = true;
+        this.preserveSaturation = true;
     }
 
     public SobelFilter(double threshHold) {
         this();
         this.threshHold = threshHold;
+    }
+
+    public SobelFilter(double threshHold, boolean preserveBrightness, boolean preserveSaturation) {
+        this();
+        this.threshHold = threshHold;
+        this.preserveBrightness = preserveBrightness;
+        this.preserveSaturation = preserveSaturation;
     }
 
     @Override
@@ -79,8 +91,8 @@ public class SobelFilter implements Filter, Convolution {
                     bufferWriter.setColor(imageX, imageY,
                             Color.hsb( Math.toDegrees( orientation[imageX][imageY] ),
                                     1.0,
-                                  targetReader.getColor(imageX, imageY).getBrightness(),
-                                  targetReader.getColor(imageX, imageY).getOpacity())
+                                  preserveBrightness ? targetReader.getColor(imageX, imageY).getBrightness() : 1.0,
+                                  preserveSaturation ? targetReader.getColor(imageX, imageY).getOpacity() : 1.0 )
                     );
                 }
                 else {
