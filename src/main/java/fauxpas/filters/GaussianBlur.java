@@ -66,7 +66,7 @@ public class GaussianBlur implements Filter, Convolution {
         for (int imageY = 0; imageY < target.getHeight(); ++imageY) {
             for (int imageX = 0; imageX < target.getWidth(); ++imageX) {
 
-                convolutionKernel = computeKernel(target, targetReader, this.kernel, imageY, imageX);
+                convolutionKernel = computeKernel(target, targetReader, this.kernel, imageX, imageY);
 
                 //sum pass;
                 sum = sumKernal(convolutionKernel);
@@ -101,7 +101,7 @@ public class GaussianBlur implements Filter, Convolution {
     }
 
     @Override
-    public double[][][] computeKernel(Image target, PixelReader targetReader, double[][] convolution, int imageY, int imageX) {
+    public double[][][] computeKernel(Image target, PixelReader targetReader, double[][] convolution, int imageX, int imageY) {
         double[][][] tempKernel = new double[this.width][this.width][GREEN+1];
 
         //multiply pass

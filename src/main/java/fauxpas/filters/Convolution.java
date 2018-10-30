@@ -5,5 +5,5 @@ import javafx.scene.image.PixelReader;
 
 public interface Convolution {
 
-    double[][][] computeKernel(Image target, PixelReader targetReader, double[][] convolution, int imageY, int imageX);
+    double[][][] computeKernel(Image target, PixelReader targetReader, double[][] convolution, int imageX, int imageY);
 }
