@@ -1,5 +1,6 @@
-package fauxpas.filters;
+package fauxpas.filters.noise;
 
+import fauxpas.filters.Filter;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;

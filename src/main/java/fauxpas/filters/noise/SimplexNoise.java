@@ -1,6 +1,7 @@
-package fauxpas.filters;
+package fauxpas.filters.noise;
 
 import fauxpas.fastnoise.FastNoise;
+import fauxpas.filters.Filter;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
@@ -8,25 +9,26 @@ import javafx.scene.paint.Color;
 
 import java.util.Random;
 
-public class PerlinNoise implements Filter {
+public class SimplexNoise implements Filter {
 
     private FastNoise fastNoise;
     private float frequencyX;
     private float frequencyY;
 
-    public PerlinNoise() {
+    public SimplexNoise() {
         this.fastNoise = new FastNoise(new Random(System.currentTimeMillis()).nextInt());
+        this.fastNoise.SetNoiseType(FastNoise.NoiseType.Simplex);
         this.frequencyX = 1.0f;
         this.frequencyY = 1.0f;
     }
 
-    public PerlinNoise(float frequency) {
+    public SimplexNoise(float frequency) {
         this();
         this.frequencyX = frequency;
         this.frequencyY = frequency;
     }
 
-    public PerlinNoise(float frequencyX, float frequencyY) {
+    public SimplexNoise(float frequencyX, float frequencyY) {
         this();
         this.frequencyX = frequencyX;
         this.frequencyY = frequencyY;
@@ -40,7 +42,7 @@ public class PerlinNoise implements Filter {
 
         for (int j = 0; j < image.getHeight(); ++j) {
             for (int i = 0; i < image.getWidth(); ++i) {
-                double color = (this.fastNoise.GetPerlin( this.frequencyX * i, this.frequencyY * j)/2) + 0.5;
+                double color =  (this.fastNoise.GetNoise(this.frequencyX * i, this.frequencyY * j)/2)+0.5;
                 bufferWriter.setColor(i, j, new Color(color, color, color, 1.0));
             }
         }

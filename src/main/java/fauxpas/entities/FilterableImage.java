@@ -1,7 +1,7 @@
 package fauxpas.entities;
 
 import fauxpas.filters.Filter;
-import fauxpas.filters.SimplexNoise;
+import fauxpas.filters.noise.WhiteNoise;
 import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
@@ -12,7 +12,7 @@ public class FilterableImage {
 
     public FilterableImage(int width, int height) {
         this.maintainedImage = new WritableImage(width, height);
-        this.applyFilter(new SimplexNoise());
+        this.applyFilter(new WhiteNoise());
     }
 
     public FilterableImage(Image maintainedImage) {

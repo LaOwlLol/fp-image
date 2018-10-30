@@ -1,6 +1,7 @@
-package fauxpas.filters;
+package fauxpas.filters.noise;
 
 import fauxpas.fastnoise.FastNoise;
+import fauxpas.filters.Filter;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
@@ -8,26 +9,26 @@ import javafx.scene.paint.Color;
 
 import java.util.Random;
 
-public class CellularNoise implements Filter {
+public class ValueNoise implements Filter {
 
     private FastNoise fastNoise;
     private float frequencyX;
     private float frequencyY;
 
-    public CellularNoise() {
+    public ValueNoise() {
         this.fastNoise = new FastNoise(new Random(System.currentTimeMillis()).nextInt());
-        this.fastNoise.SetNoiseType(FastNoise.NoiseType.Cellular);
+        this.fastNoise.SetNoiseType(FastNoise.NoiseType.Value);
         this.frequencyX = 1.0f;
         this.frequencyY = 1.0f;
     }
 
-    public CellularNoise(float frequency) {
+    public ValueNoise(float frequency) {
         this();
         this.frequencyX = frequency;
         this.frequencyY = frequency;
     }
 
-    public CellularNoise(float frequencyX, float frequencyY) {
+    public ValueNoise(float frequencyX, float frequencyY) {
         this();
         this.frequencyX = frequencyX;
         this.frequencyY = frequencyY;

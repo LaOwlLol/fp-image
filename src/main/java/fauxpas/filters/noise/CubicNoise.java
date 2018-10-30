@@ -1,6 +1,7 @@
-package fauxpas.filters;
+package fauxpas.filters.noise;
 
 import fauxpas.fastnoise.FastNoise;
+import fauxpas.filters.Filter;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
@@ -8,26 +9,26 @@ import javafx.scene.paint.Color;
 
 import java.util.Random;
 
-public class SimplexNoise implements Filter {
+public class CubicNoise implements Filter {
 
     private FastNoise fastNoise;
     private float frequencyX;
     private float frequencyY;
 
-    public SimplexNoise() {
+    public CubicNoise() {
         this.fastNoise = new FastNoise(new Random(System.currentTimeMillis()).nextInt());
-        this.fastNoise.SetNoiseType(FastNoise.NoiseType.Simplex);
+        this.fastNoise.SetNoiseType(FastNoise.NoiseType.Cubic);
         this.frequencyX = 1.0f;
         this.frequencyY = 1.0f;
     }
 
-    public SimplexNoise(float frequency) {
+    public CubicNoise(float frequency) {
         this();
         this.frequencyX = frequency;
         this.frequencyY = frequency;
     }
 
-    public SimplexNoise(float frequencyX, float frequencyY) {
+    public CubicNoise(float frequencyX, float frequencyY) {
         this();
         this.frequencyX = frequencyX;
         this.frequencyY = frequencyY;
@@ -48,4 +49,5 @@ public class SimplexNoise implements Filter {
 
         return buffer;
     }
+
 }
