@@ -64,7 +64,7 @@ public class GaussianBlur implements Filter {
                 int y = imageY+j;
 
                 if ( ((x > 0) && (x < target.getWidth())) && ((y > 0) && (y < target.getHeight())) ) {
-                    colors.put(i, j, colorReader.getColorProperty(targetReader.getColor(x, y)) );
+                    colors.put(kernelX, kernelY, colorReader.getColorProperty(targetReader.getColor(x, y)) );
                 }
 
             }
