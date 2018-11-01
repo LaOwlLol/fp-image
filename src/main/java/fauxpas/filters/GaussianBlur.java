@@ -50,26 +50,6 @@ public class GaussianBlur implements Filter {
         }
     }
 
-    private DoubleMatrix getColorMatrix(Image target, ColorReader colorReader, int imageX, int imageY ) {
-        DoubleMatrix colors = new DoubleMatrix(this.width, this.width);
-        PixelReader targetReader = target.getPixelReader();
-
-        for (int kernelY = 0; kernelY < this.width; ++kernelY ) {
-            for (int kernelX = 0; kernelX < this.width; ++kernelX) {
-
-                int i = kernelX - this.mid;
-                int j = kernelY - this.mid;
-
-                if ( ((imageX+i > 0) && (imageX+i < target.getWidth())) && ((imageY+j > 0) && (imageY+j < target.getHeight())) ) {
-                    colors.put(kernelX, kernelY, colorReader.getColorProperty(targetReader.getColor(imageX+i, imageY+j)) );
-                }
-
-            }
-        }
-
-        return colors;
-    }
-
     @Override
     public Image apply(Image target) {
 
@@ -82,9 +62,9 @@ public class GaussianBlur implements Filter {
 
                 //apply
                 bufferWriter.setColor(imageX, imageY, new Color(
-                      getColorMatrix(target, Color::getRed, imageX, imageY).mul(this.kernel).sum()/this.kernelValue,
-                      getColorMatrix(target, Color::getGreen, imageX, imageY).mul(this.kernel).sum()/this.kernelValue,
-                      getColorMatrix(target, Color::getBlue, imageX, imageY).mul(this.kernel).sum()/this.kernelValue,
+                      ColorMatrixBuilder.getColorMatrix(target, Color::getRed, this.width, imageX, imageY).mul(this.kernel).sum()/this.kernelValue,
+                        ColorMatrixBuilder.getColorMatrix(target, Color::getGreen, this.width, imageX, imageY).mul(this.kernel).sum()/this.kernelValue,
+                        ColorMatrixBuilder.getColorMatrix(target, Color::getBlue, this.width, imageX, imageY).mul(this.kernel).sum()/this.kernelValue,
                       targetReader.getColor(imageX, imageY).getOpacity() ) );
             }
         }
