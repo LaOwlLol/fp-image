@@ -18,7 +18,6 @@ public class GaussianBlur implements Filter {
     private int width;
     private final int mid;
 
-
     public GaussianBlur(int width, double standardDeviation) {
 
         //todo all good if no true center to kernel?
@@ -45,7 +44,7 @@ public class GaussianBlur implements Filter {
                 int j = y - mid;
                 double expNumer = Math.pow(i, 2) + Math.pow(j, 2);
                 double kvalue = (1.0/outerDenom) * Math.exp(expNumer/expDenom);
-                this.kernel.put(y, x, kvalue);
+                this.kernel.put(x, y, kvalue);
                 this.kernelValue += kvalue;
             }
         }
@@ -60,11 +59,9 @@ public class GaussianBlur implements Filter {
 
                 int i = kernelX - this.mid;
                 int j = kernelY - this.mid;
-                int x = imageX+i;
-                int y = imageY+j;
 
-                if ( ((x > 0) && (x < target.getWidth())) && ((y > 0) && (y < target.getHeight())) ) {
-                    colors.put(kernelX, kernelY, colorReader.getColorProperty(targetReader.getColor(x, y)) );
+                if ( ((imageX+i > 0) && (imageX+i < target.getWidth())) && ((imageY+j > 0) && (imageY+j < target.getHeight())) ) {
+                    colors.put(kernelX, kernelY, colorReader.getColorProperty(targetReader.getColor(imageX+i, imageY+j)) );
                 }
 
             }
@@ -80,32 +77,15 @@ public class GaussianBlur implements Filter {
         WritableImage buffer = new WritableImage((int) target.getWidth(), (int) target.getHeight());
         PixelWriter bufferWriter = buffer.getPixelWriter();
 
-        double [] sum = new double[BLUE+1];
-
         for (int imageY = 0; imageY < target.getHeight(); ++imageY) {
             for (int imageX = 0; imageX < target.getWidth(); ++imageX) {
 
-                DoubleMatrix red = getColorMatrix(target, Color::getRed, imageX, imageY).mmul(this.kernel);
-                DoubleMatrix green = getColorMatrix(target, Color::getGreen, imageX, imageY).mmul(this.kernel);
-                DoubleMatrix blue = getColorMatrix(target, Color::getBlue, imageX, imageY).mmul(this.kernel);
-                double opacity = targetReader.getColor(imageX, imageY).getOpacity();
-
-                sum[RED] = ( red.get(0,0) +
-                      red.get(1,1) +
-                      red.get(2,2) ) /
-                      this.kernelValue;
-                sum[GREEN] = ( green.get(0,0) +
-                      green.get(1,1) +
-                      green.get(2,2) ) /
-                      this.kernelValue;
-
-                sum[BLUE] = ( blue.get(0,0) +
-                      blue.get(1,1) +
-                      blue.get(2,2) ) /
-                      this.kernelValue;
-
                 //apply
-                bufferWriter.setColor(imageX, imageY, new Color(sum[RED], sum[GREEN], sum[BLUE], opacity ) );
+                bufferWriter.setColor(imageX, imageY, new Color(
+                      getColorMatrix(target, Color::getRed, imageX, imageY).mul(this.kernel).sum()/this.kernelValue,
+                      getColorMatrix(target, Color::getGreen, imageX, imageY).mul(this.kernel).sum()/this.kernelValue,
+                      getColorMatrix(target, Color::getBlue, imageX, imageY).mul(this.kernel).sum()/this.kernelValue,
+                      targetReader.getColor(imageX, imageY).getOpacity() ) );
             }
         }
 
