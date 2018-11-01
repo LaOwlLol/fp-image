@@ -5,15 +5,16 @@ import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
+import org.jblas.DoubleMatrix;
 
-public class GaussianBlur implements Filter, Convolution {
+public class GaussianBlur implements Filter {
 
     private static final int RED = 0;
-    private static final int BLUE = 1;
-    private static final int GREEN = 2;
+    private static final int GREEN = 1;
+    private static final int BLUE = 2;
     private double kernelValue;
     private double standardDeviation;
-    private double [][] kernel;
+    private DoubleMatrix kernel;
     private int width;
     private final int mid;
 
@@ -28,7 +29,7 @@ public class GaussianBlur implements Filter, Convolution {
 
         this.standardDeviation = standardDeviation;
         this.width = width;
-        this.kernel = new double[this.width][this.width];
+        this.kernel = new DoubleMatrix(this.width, this.width);
 
         this.mid = width/2;
 
@@ -44,12 +45,32 @@ public class GaussianBlur implements Filter, Convolution {
                 int j = y - mid;
                 double expNumer = Math.pow(i, 2) + Math.pow(j, 2);
                 double kvalue = (1.0/outerDenom) * Math.exp(expNumer/expDenom);
-                this.kernel[x][y] = kvalue;
+                this.kernel.put(y, x, kvalue);
                 this.kernelValue += kvalue;
             }
         }
+    }
 
+    private DoubleMatrix getColorMatrix(Image target, ColorReader colorReader, int imageX, int imageY ) {
+        DoubleMatrix colors = new DoubleMatrix(this.width, this.width);
+        PixelReader targetReader = target.getPixelReader();
 
+        for (int kernelY = 0; kernelY < this.width; ++kernelY ) {
+            for (int kernelX = 0; kernelX < this.width; ++kernelX) {
+
+                int i = kernelX - this.mid;
+                int j = kernelY - this.mid;
+                int x = imageX+i;
+                int y = imageY+j;
+
+                if ( ((x > 0) && (x < target.getWidth())) && ((y > 0) && (y < target.getHeight())) ) {
+                    colors.put(i, j, colorReader.getColorProperty(targetReader.getColor(x, y)) );
+                }
+
+            }
+        }
+
+        return colors;
     }
 
     @Override
@@ -59,72 +80,36 @@ public class GaussianBlur implements Filter, Convolution {
         WritableImage buffer = new WritableImage((int) target.getWidth(), (int) target.getHeight());
         PixelWriter bufferWriter = buffer.getPixelWriter();
 
-        double[][][] convolutionKernel;
-
-        double [] sum;
+        double [] sum = new double[BLUE+1];
 
         for (int imageY = 0; imageY < target.getHeight(); ++imageY) {
             for (int imageX = 0; imageX < target.getWidth(); ++imageX) {
 
-                convolutionKernel = computeKernel(target, targetReader, this.kernel, imageX, imageY);
+                DoubleMatrix red = getColorMatrix(target, Color::getRed, imageX, imageY).mmul(this.kernel);
+                DoubleMatrix green = getColorMatrix(target, Color::getGreen, imageX, imageY).mmul(this.kernel);
+                DoubleMatrix blue = getColorMatrix(target, Color::getBlue, imageX, imageY).mmul(this.kernel);
+                double opacity = targetReader.getColor(imageX, imageY).getOpacity();
 
-                //sum pass;
-                sum = sumKernal(convolutionKernel);
+                sum[RED] = ( red.get(0,0) +
+                      red.get(1,1) +
+                      red.get(2,2) ) /
+                      this.kernelValue;
+                sum[GREEN] = ( green.get(0,0) +
+                      green.get(1,1) +
+                      green.get(2,2) ) /
+                      this.kernelValue;
+
+                sum[BLUE] = ( blue.get(0,0) +
+                      blue.get(1,1) +
+                      blue.get(2,2) ) /
+                      this.kernelValue;
 
                 //apply
-
-                bufferWriter.setColor(imageX, imageY,
-                      new Color(sum[RED]/this.kernelValue,
-                            sum[GREEN]/this.kernelValue,
-                            sum[BLUE]/this.kernelValue,
-                            targetReader.getColor(imageX, imageY).getOpacity())
-                );
+                bufferWriter.setColor(imageX, imageY, new Color(sum[RED], sum[GREEN], sum[BLUE], opacity ) );
             }
         }
 
         return buffer;
     }
 
-    private double[] sumKernal(double[][][] tempKernel) {
-        double [] sum = new double[GREEN+1];
-        sum[RED] = 0.0;
-        sum[BLUE] = 0.0;
-        sum[GREEN] = 0.0;
-        for (int kernelY = 0; kernelY < this.width; ++kernelY ) {
-            for (int kernelX = 0; kernelX < this.width; ++kernelX) {
-                sum[RED] += tempKernel[kernelX][kernelY][RED];
-                sum[BLUE] += tempKernel[kernelX][kernelY][BLUE];
-                sum[GREEN] += tempKernel[kernelX][kernelY][GREEN];
-            }
-        }
-        return sum;
-    }
-
-    @Override
-    public double[][][] computeKernel(Image target, PixelReader targetReader, double[][] convolution, int imageX, int imageY) {
-        double[][][] tempKernel = new double[this.width][this.width][GREEN+1];
-
-        //multiply pass
-        for (int kernelY = 0; kernelY < this.width; ++kernelY ) {
-            for (int kernelX = 0; kernelX < this.width; ++kernelX) {
-
-                int i = kernelX - this.mid;
-                int j = kernelY - this.mid;
-
-                if ((imageX+i) > 0 && (imageX+i) < target.getWidth() &&
-                      (imageY+j) > 0 && (imageY+j) < target.getHeight()) {
-                    tempKernel[kernelX][kernelY][RED] = targetReader.getColor(imageX+i,imageY+j).getRed() *
-                          convolution[kernelX][kernelY];
-
-                    tempKernel[kernelX][kernelY][BLUE] = targetReader.getColor(imageX+i,imageY+j).getBlue() *
-                          convolution[kernelX][kernelY];
-
-                    tempKernel[kernelX][kernelY][GREEN] = targetReader.getColor(imageX+i,imageY+j).getGreen() *
-                          convolution[kernelX][kernelY];
-                }
-
-            }
-        }
-        return tempKernel;
-    }
 }

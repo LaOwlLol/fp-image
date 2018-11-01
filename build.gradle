@@ -25,6 +25,10 @@ dependencies {
 
     testImplementation 'junit:junit:4.12'
 
+    // https://mvnrepository.com/artifact/org.jblas/jblas
+    compile group: 'org.jblas', name: 'jblas', version: '1.2.4'
+
+    //code in FastNoise required this, but it got commented out.
     // https://mvnrepository.com/artifact/javax.vecmath/vecmath
     //runtime group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
 
