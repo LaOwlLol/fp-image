@@ -9,59 +9,59 @@ import org.jblas.DoubleMatrix;
 
 public class CannyFilter implements Filter{
 
-    private final DoubleMatrix horzKernal;
-    private final DoubleMatrix vertKernal;
-    private final DoubleMatrix posSlopeKernal;
-    private final DoubleMatrix negSlopeKernal;
+    private final DoubleMatrix horzKernel;
+    private final DoubleMatrix vertKernel;
+    private final DoubleMatrix posSlopeKernel;
+    private final DoubleMatrix negSlopeKernel;
     private final int WIDTH = 3;
     private double lowerThreshHold;
     private double upperThreshHold;
 
     public CannyFilter() {
 
-        this.horzKernal = new DoubleMatrix(WIDTH, WIDTH);
-        this.horzKernal.put(0,0, 0.0);
-        this.horzKernal.put(1, 0, 1.0);
-        this.horzKernal.put(2,0, 0.0);
-        this.horzKernal.put(0,1, 0.0);
-        this.horzKernal.put(1,1, 0.0);
-        this.horzKernal.put(2, 1,0.0);
-        this.horzKernal.put(0,2, 0.0);
-        this.horzKernal.put(1,2,1.0);
-        this.horzKernal.put(2,2,0.0);
+        this.horzKernel = new DoubleMatrix(WIDTH, WIDTH);
+        this.horzKernel.put(0,0, 0.0);
+        this.horzKernel.put(1, 0, 1.0);
+        this.horzKernel.put(2,0, 0.0);
+        this.horzKernel.put(0,1, 0.0);
+        this.horzKernel.put(1,1, 0.0);
+        this.horzKernel.put(2, 1,0.0);
+        this.horzKernel.put(0,2, 0.0);
+        this.horzKernel.put(1,2,1.0);
+        this.horzKernel.put(2,2,0.0);
 
-        this.vertKernal = new DoubleMatrix(WIDTH, WIDTH);
-        this.vertKernal.put(0,0, 0.0);
-        this.vertKernal.put(0,1,0.0);
-        this.vertKernal.put(0, 2, 0.0);
-        this.vertKernal.put(1, 0, 1.0);
-        this.vertKernal.put(1,1,0.0);
-        this.vertKernal.put(1,2,1.0);
-        this.vertKernal.put(2, 0,0.0);
-        this.vertKernal.put(2, 1, 0.0);
-        this.vertKernal.put(2, 2, 0.0);
+        this.vertKernel = new DoubleMatrix(WIDTH, WIDTH);
+        this.vertKernel.put(0,0, 0.0);
+        this.vertKernel.put(0,1,0.0);
+        this.vertKernel.put(0, 2, 0.0);
+        this.vertKernel.put(1, 0, 1.0);
+        this.vertKernel.put(1,1,0.0);
+        this.vertKernel.put(1,2,1.0);
+        this.vertKernel.put(2, 0,0.0);
+        this.vertKernel.put(2, 1, 0.0);
+        this.vertKernel.put(2, 2, 0.0);
 
-        this.posSlopeKernal = new DoubleMatrix(WIDTH, WIDTH);
-        this.posSlopeKernal.put(0, 0, 0.0);
-        this.posSlopeKernal.put(0, 1, 0.0);
-        this.posSlopeKernal.put(0,2,1.0);
-        this.posSlopeKernal.put(1, 0, 0.0);
-        this.posSlopeKernal.put(1, 1, 0.0);
-        this.posSlopeKernal.put(1, 2, 0.0);
-        this.posSlopeKernal.put(2, 0, 1.0);
-        this.posSlopeKernal.put(2, 1, 0.0);
-        this.posSlopeKernal.put(2, 2,  0.0);
+        this.posSlopeKernel = new DoubleMatrix(WIDTH, WIDTH);
+        this.posSlopeKernel.put(0, 0, 0.0);
+        this.posSlopeKernel.put(0, 1, 0.0);
+        this.posSlopeKernel.put(0,2,1.0);
+        this.posSlopeKernel.put(1, 0, 0.0);
+        this.posSlopeKernel.put(1, 1, 0.0);
+        this.posSlopeKernel.put(1, 2, 0.0);
+        this.posSlopeKernel.put(2, 0, 1.0);
+        this.posSlopeKernel.put(2, 1, 0.0);
+        this.posSlopeKernel.put(2, 2,  0.0);
 
-        this.negSlopeKernal = new DoubleMatrix(WIDTH, WIDTH);
-        this.negSlopeKernal.put(0, 0, 1.0);
-        this.negSlopeKernal.put(0, 1, 0.0);
-        this.negSlopeKernal.put(0, 2, 0.0);
-        this.negSlopeKernal.put(1, 0, 0.0);
-        this.negSlopeKernal.put(1, 1, 0.0);
-        this.negSlopeKernal.put(1, 2, 0.0);
-        this.negSlopeKernal.put(2, 0, 0.0);
-        this.negSlopeKernal.put(2, 1, 0.0);
-        this.negSlopeKernal.put(2, 2, 1.0);
+        this.negSlopeKernel = new DoubleMatrix(WIDTH, WIDTH);
+        this.negSlopeKernel.put(0, 0, 1.0);
+        this.negSlopeKernel.put(0, 1, 0.0);
+        this.negSlopeKernel.put(0, 2, 0.0);
+        this.negSlopeKernel.put(1, 0, 0.0);
+        this.negSlopeKernel.put(1, 1, 0.0);
+        this.negSlopeKernel.put(1, 2, 0.0);
+        this.negSlopeKernel.put(2, 0, 0.0);
+        this.negSlopeKernel.put(2, 1, 0.0);
+        this.negSlopeKernel.put(2, 2, 1.0);
 
         this.upperThreshHold = 0.15;
         this.lowerThreshHold = 0.0001;
@@ -94,19 +94,19 @@ public class CannyFilter implements Filter{
                     //horizontal line
                     if ( ((orientation > 337.5 && orientation <= 360 ) || ( orientation > 0 && orientation <= 22.5 )) ||
                             (orientation > 157.5 && orientation <= 202.5 )) {
-                        kernelSum = horzKernal.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBlue, WIDTH, imageX, imageY)).sum();
+                        kernelSum = horzKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBlue, WIDTH, imageX, imageY)).sum();
                     }
                     //vertical line
                     else if ( (orientation > 67.5 && orientation >= 112.5) || ( orientation > 247.5 && orientation <= 292.5 ) ) {
-                        kernelSum  = vertKernal.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBlue, WIDTH, imageX, imageY)).sum();
+                        kernelSum  = vertKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBlue, WIDTH, imageX, imageY)).sum();
                     }
                     //positive slope
                     else if ( (orientation > 22.5 && orientation >= 67.5) || ( orientation > 202.5 && orientation <= 247.5) ) {
-                        kernelSum  = posSlopeKernal.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBlue, WIDTH, imageX, imageY)).sum();
+                        kernelSum  = posSlopeKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBlue, WIDTH, imageX, imageY)).sum();
                     }
                     //negative slope
                     else if ( (orientation > 112.5 && orientation >= 157.5) || ( orientation > 292.5 && orientation <= 337.5) ) {
-                        kernelSum  = negSlopeKernal.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBlue, WIDTH, imageX, imageY)).sum();
+                        kernelSum  = negSlopeKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBlue, WIDTH, imageX, imageY)).sum();
                     }
 
                     if (gradient > kernelSum) {
