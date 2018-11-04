@@ -5,69 +5,63 @@ import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
+import org.jblas.DoubleMatrix;
 
-public class CannyFilter implements Filter, Convolution{
+public class CannyFilter implements Filter{
 
-    private final double[][] horzKernal;
-    private final double[][] vertKernal;
-    private final double[][] posSlopeKernal;
-    private final double[][] negSlopeKernal;
+    private final DoubleMatrix horzKernal;
+    private final DoubleMatrix vertKernal;
+    private final DoubleMatrix posSlopeKernal;
+    private final DoubleMatrix negSlopeKernal;
     private final int WIDTH = 3;
     private double lowerThreshHold;
     private double upperThreshHold;
-    /*private double[] lowerThreshHold;
-    private double[] upperThreshHold;
-    private final int ORIENTATION_COUNT = 4;
-    private final int HORIZONTAL = 0;
-    private final int VERTICAL = 1;
-    private final int POSITIVE_SLOPE = 2;
-    private final int NEGATIVE_SLOPE = 3;*/
 
     public CannyFilter() {
 
-        this.horzKernal = new double[WIDTH][WIDTH];
-        this.horzKernal[0][0] = 0.0;
-        this.horzKernal[1][0] = 1.0;
-        this.horzKernal[2][0] = 0.0;
-        this.horzKernal[0][1] = 0.0;
-        this.horzKernal[1][1] = 0.0;
-        this.horzKernal[2][1] = 0.0;
-        this.horzKernal[0][2] = 0.0;
-        this.horzKernal[1][2] = 1.0;
-        this.horzKernal[2][2] = 0.0;
+        this.horzKernal = new DoubleMatrix(WIDTH, WIDTH);
+        this.horzKernal.put(0,0, 0.0);
+        this.horzKernal.put(1, 0, 1.0);
+        this.horzKernal.put(2,0, 0.0);
+        this.horzKernal.put(0,1, 0.0);
+        this.horzKernal.put(1,1, 0.0);
+        this.horzKernal.put(2, 1,0.0);
+        this.horzKernal.put(0,2, 0.0);
+        this.horzKernal.put(1,2,1.0);
+        this.horzKernal.put(2,2,0.0);
 
-        this.vertKernal = new double[WIDTH][WIDTH];
-        this.vertKernal[0][0] = 0.0;
-        this.vertKernal[0][1] = 0.0;
-        this.vertKernal[0][2] = 0.0;
-        this.vertKernal[1][0] = 1.0;
-        this.vertKernal[1][1] = 0.0;
-        this.vertKernal[1][2] = 1.0;
-        this.vertKernal[2][0] = 0.0;
-        this.vertKernal[2][1] = 0.0;
-        this.vertKernal[2][2] = 0.0;
+        this.vertKernal = new DoubleMatrix(WIDTH, WIDTH);
+        this.vertKernal.put(0,0, 0.0);
+        this.vertKernal.put(0,1,0.0);
+        this.vertKernal.put(0, 2, 0.0);
+        this.vertKernal.put(1, 0, 1.0);
+        this.vertKernal.put(1,1,0.0);
+        this.vertKernal.put(1,2,1.0);
+        this.vertKernal.put(2, 0,0.0);
+        this.vertKernal.put(2, 1, 0.0);
+        this.vertKernal.put(2, 2, 0.0);
 
-        this.posSlopeKernal = new double[WIDTH][WIDTH];
-        this.posSlopeKernal[0][0] = 0.0;
-        this.posSlopeKernal[0][1] = 0.0;
-        this.posSlopeKernal[0][2] = 1.0;
-        this.posSlopeKernal[1][0] = 0.0;
-        this.posSlopeKernal[1][1] = 0.0;
-        this.posSlopeKernal[1][2] = 0.0;
-        this.posSlopeKernal[2][0] = 1.0;
-        this.posSlopeKernal[2][1] = 0.0;
-        this.posSlopeKernal[2][2] = 0.0;
+        this.posSlopeKernal = new DoubleMatrix(WIDTH, WIDTH);
+        this.posSlopeKernal.put(0, 0, 0.0);
+        this.posSlopeKernal.put(0, 1, 0.0);
+        this.posSlopeKernal.put(0,2,1.0);
+        this.posSlopeKernal.put(1, 0, 0.0);
+        this.posSlopeKernal.put(1, 1, 0.0);
+        this.posSlopeKernal.put(1, 2, 0.0);
+        this.posSlopeKernal.put(2, 0, 1.0);
+        this.posSlopeKernal.put(2, 1, 0.0);
+        this.posSlopeKernal.put(2, 2,  0.0);
 
-        this.negSlopeKernal = new double[WIDTH][WIDTH];
-        this.negSlopeKernal[0][0] = 1.0;
-        this.negSlopeKernal[0][1] = 0.0;
-        this.negSlopeKernal[0][2] = 0.0;
-        this.negSlopeKernal[1][0] = 0.0;
-        this.negSlopeKernal[1][1] = 0.0;
-        this.negSlopeKernal[1][2] = 0.0;
-        this.negSlopeKernal[2][0] = 0.0;
-        this.negSlopeKernal[2][1] = 0.0;
-        this.negSlopeKernal[2][2] = 1.0;
+        this.negSlopeKernal = new DoubleMatrix(WIDTH, WIDTH);
+        this.negSlopeKernal.put(0, 0, 1.0);
+        this.negSlopeKernal.put(0, 1, 0.0);
+        this.negSlopeKernal.put(0, 2, 0.0);
+        this.negSlopeKernal.put(1, 0, 0.0);
+        this.negSlopeKernal.put(1, 1, 0.0);
+        this.negSlopeKernal.put(1, 2, 0.0);
+        this.negSlopeKernal.put(2, 0, 0.0);
+        this.negSlopeKernal.put(2, 1, 0.0);
+        this.negSlopeKernal.put(2, 2, 1.0);
 
         this.upperThreshHold = 0.15;
         this.lowerThreshHold = 0.0001;
@@ -79,47 +73,12 @@ public class CannyFilter implements Filter, Convolution{
         this.lowerThreshHold = lowerThreshHold;
     }
 
-    private double sumKernel(double[][][] tempKernal) {
-        double sum = 0;
-
-        for (int kernelY = 0; kernelY < WIDTH; ++kernelY ) {
-            for (int kernelX = 0; kernelX < WIDTH; ++kernelX) {
-                sum += tempKernal[kernelX][kernelY][0];
-            }
-        }
-        return sum;
-    }
-
-    @Override
-    public double[][][] computeKernel(Image target, PixelReader targetReader, double[][] convolution, int imageX, int imageY) {
-        double[][][] tempKernel = new double[WIDTH][WIDTH][1];
-
-        //multiply pass
-        for (int kernelY = 0; kernelY < WIDTH; ++kernelY ) {
-            for (int kernelX = 0; kernelX < WIDTH; ++kernelX) {
-
-                int i = kernelX - (WIDTH/2);
-                int j = kernelY - (WIDTH/2);
-
-                if ((imageX+i) > 0 && (imageX+i) < target.getWidth() &&
-                        (imageY+j) > 0 && (imageY+j) < target.getHeight()) {
-                    tempKernel[kernelX][kernelY][0] = targetReader.getColor(imageX+i,imageY+j).getRed() *
-                            convolution[kernelX][kernelY];
-                }
-
-            }
-        }
-        return tempKernel;
-    }
-
     @Override
     public Image apply(Image target) {
         PixelReader targetReader = target.getPixelReader();
         WritableImage buffer = new WritableImage((int) target.getWidth(), (int) target.getHeight());
         PixelWriter bufferWriter = buffer.getPixelWriter();
         double orientation;
-
-        double[][][] convolutionKernel = new double[WIDTH][WIDTH][1];
 
         double kernelSum;
         double gradient;
@@ -130,27 +89,25 @@ public class CannyFilter implements Filter, Convolution{
 
                     orientation = targetReader.getColor(imageX, imageY).getHue();
                     gradient = targetReader.getColor(imageX, imageY).getBrightness();
+                    kernelSum = 0.0;
 
                     //horizontal line
                     if ( ((orientation > 337.5 && orientation <= 360 ) || ( orientation > 0 && orientation <= 22.5 )) ||
                             (orientation > 157.5 && orientation <= 202.5 )) {
-                        convolutionKernel = computeKernel(target, targetReader, horzKernal, imageX, imageY);
+                        kernelSum = horzKernal.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBlue, WIDTH, imageX, imageY)).sum();
                     }
                     //vertical line
                     else if ( (orientation > 67.5 && orientation >= 112.5) || ( orientation > 247.5 && orientation <= 292.5 ) ) {
-                        convolutionKernel = computeKernel(target, targetReader, vertKernal, imageX, imageY);
+                        kernelSum  = vertKernal.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBlue, WIDTH, imageX, imageY)).sum();
                     }
                     //positive slope
                     else if ( (orientation > 22.5 && orientation >= 67.5) || ( orientation > 202.5 && orientation <= 247.5) ) {
-                        convolutionKernel = computeKernel(target, targetReader, posSlopeKernal, imageX, imageY);
+                        kernelSum  = posSlopeKernal.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBlue, WIDTH, imageX, imageY)).sum();
                     }
                     //negative slope
                     else if ( (orientation > 112.5 && orientation >= 157.5) || ( orientation > 292.5 && orientation <= 337.5) ) {
-                        convolutionKernel = computeKernel(target, targetReader, negSlopeKernal, imageX, imageY);
+                        kernelSum  = negSlopeKernal.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBlue, WIDTH, imageX, imageY)).sum();
                     }
-
-                    //sum pass;
-                    kernelSum = Math.abs(sumKernel(convolutionKernel));
 
                     if (gradient > kernelSum) {
                         bufferWriter.setColor(imageX, imageY, Color.gray(gradient, targetReader.getColor(imageX, imageY).getOpacity()));
