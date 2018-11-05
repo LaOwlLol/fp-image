@@ -31,16 +31,12 @@ noiseImage.applyFilter(new PerlinNoise());
 
 #### Gaussian blur and Sobel edge detect:
 
-Gaussian blur and simple edge detection are available.
-
+A Gaussian blur implementation is available.
 ```java
-
-FilterableImage myFilteredImage = new FilterableImage(myImage);
 
 //arg1 = Convolution kernel width (rec. 3, larger means more compute time), arg2 = standard deviation. 
 myFilteredImage.applyFilter(new GaussianBlur(3, 3));
 
-myFilteredImage.applyFilter(new SobelFilter());
 ```
  
 #### Blend or Sum noise values:
