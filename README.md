@@ -29,23 +29,12 @@ FilterableImage noiseImage = new FilterableImage(800, 600);
 noiseImage.applyFilter(new PerlinNoise());
 ```
 
-#### Gaussian blur and Sobel edge detect:
-
-A Gaussian blur implementation is available.
-```java
-
-//arg1 = Convolution kernel width (rec. 3, larger means more compute time), arg2 = standard deviation. 
-myFilteredImage.applyFilter(new GaussianBlur(3, 3));
-
-```
- 
-#### Blend or Sum noise values:
+#### Mixers:
 
 Mixers blended or sum the color values for the results of two filters. Be sure the return images are the same dimensions.
 
 ```java
-FilterableImage noiseImage = new FilterableImage(800, 600);
-noiseImage.applyFilter(new PerlinNoise());
+FilterableImage noiseImage = new FilterableImage(myImage);
 
 // blend calculates pixel color channel as color1.getRed() - (color1.getRed() - color2.getRed())/2
 noiseImage.applyFilter( BlendFilter().apply(image -> image , new SimplexNoise(2)) )
@@ -54,7 +43,16 @@ noiseImage = new FilterableImage(800, 600);
 noiseImage.applyFilter(new PerlinNoise());
 
 // sum calculates pixel color channel as  (intensity1*color1.getRed()) + (intensity2*color2.getRed())
-.applyFilter( SumFilter().apply(image -> image, new SimplexNoise(2)) )
+noiseImage..applyFilter( SumFilter().apply(image -> image, new SimplexNoise(2)) )
+```
+
+#### Gaussian Blur
+
+A Gaussian blur implementation is available.
+
+```java
+//arg1 = Convolution kernel width (rec. 3, larger means more compute time), arg2 = standard deviation. 
+myFilteredImage.applyFilter(new GaussianBlur(3, 3));
 ```
 
 #### Sobel Edges:
