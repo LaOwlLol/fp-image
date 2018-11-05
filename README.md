@@ -2,11 +2,11 @@
 A simple general purpose image processing library for Java.
 
 ### Version 0.1.0
-This API provides a filter features which can be applied to a wrap a JavaFX 8 Image called FilterableImage.
+This API provides a filter feature which can be applied to a JavaFX 8 Image wrapped in an object called FilterableImage.
 
-Filters can be defined by implementing the functional interface Filter.
+This API provides implementations of Gaussian Blur, Sobel edges, and Canny edges filters. Custom filters can be defined by implementing the functional interface Filter.
 
-The API also provides a way to Mix Filters with the functional interface Mixer.
+The API also provides a way to mix/blend filtered images with the functional interface Mixer.
 
 #### Define an FilterableImage:
 
@@ -29,9 +29,9 @@ FilterableImage noiseImage = new FilterableImage(800, 600);
 noiseImage.applyFilter(new PerlinNoise());
 ```
 
-#### Gaussian blur and Sobel edge detect
+#### Gaussian blur and Sobel edge detect:
 
-Gaussian blue and simple edge detection are available.
+Gaussian blur and simple edge detection are available.
 
 ```java
 
@@ -43,23 +43,47 @@ myFilteredImage.applyFilter(new GaussianBlur(3, 3));
 myFilteredImage.applyFilter(new SobelFilter());
 ```
  
-#### Blend or Sum noise values.
+#### Blend or Sum noise values:
 
-Although fairly verbose, you can mix two noise signals by applying a Mixer (which returns new filter to be applied) where the first filter argument is the redistribution filter with a power of 1.0. This is because pixel color value to the power 1 returns the original color value.
+Mixers blended or sum the color values for the results of two filters. Be sure the return images are the same dimensions.
 
 ```java
 FilterableImage noiseImage = new FilterableImage(800, 600);
 noiseImage.applyFilter(new PerlinNoise());
 
 // blend calculates pixel color channel as color1.getRed() - (color1.getRed() - color2.getRed())/2
-noiseImage.applyFilter( BlendFilter().apply(new RedistributionFilter(1.0), new SimplexNoise(2)) )
+noiseImage.applyFilter( BlendFilter().apply(image -> image , new SimplexNoise(2)) )
 
 noiseImage = new FilterableImage(800, 600);
 noiseImage.applyFilter(new PerlinNoise());
 
 // sum calculates pixel color channel as  (intensity1*color1.getRed()) + (intensity2*color2.getRed())
-.applyFilter( SumFilter().apply(new RedistributionFilter(1.0), new SimplexNoise(2)) )
+.applyFilter( SumFilter().apply(image -> image, new SimplexNoise(2)) )
 ```
+
+#### Sobel Edges:
+
+It's always recommended to blur an images before detect images. Sobel filter internally uses a grayscale filter, so there is no need to do this on your own (although this may change in the future). 
+
+The parameter to Sobel filter is a threshold value to further reduce noisy edges in the image. A very small value (about 0.02 - 0.01 or lower, even 0.0) seems to work well, but fine tuning images is probably required.
+
+```java
+myFilteredImage.applyFilter(new GaussianBlur(3,3));
+myFilteredImage.applyFilter(new SobelFilter(0.02));
+```
+
+#### Canny Edges: 
+
+CannyFilter works on the output of a SobelFilter (it does not internally call sobel at this time).  CannyFilter constructor can take an upper and low threshold values for double threshold and edge tracking by hysteresis (see wikipedia).  If not thresholds are provided the default value are 0.0001 and 0.15.
+
+```java
+myFilteredImage.applyFilter(new GaussianBlur(3,3));
+myFilteredImage.applyFilter(new SobelFilter(0.00001));
+myFilteredImage.applyFilter(new CannyFilter());
+```
+
+
+
 
 
 
