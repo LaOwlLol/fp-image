@@ -18,10 +18,34 @@ public class ColorMatrixBuilder {
                 int j = kernelY - midPoint;
 
                 if ( ((imageX+i > 0) && (imageX+i < target.getWidth())) && ((imageY+j > 0) && (imageY+j < target.getHeight())) ) {
-                    colors.put(kernelX, kernelY, colorReader.getColorProperty(targetReader.getColor(imageX+i, imageY+j)) );
+                    colors.put(kernelY, kernelX, colorReader.getColorProperty(targetReader.getColor(imageX+i, imageY+j)) );
+                }
+                else {
+                    colors.put(kernelY, kernelX, colorReader.getColorProperty(targetReader.getColor(imageX, imageY)));
                 }
             }
         }
+        return colors;
+    }
+
+    public static DoubleMatrix getColorColumnVector(Image target, ColorReader colorReader, int vectorHeight, int imageX, int imageY ) {
+        DoubleMatrix colors = new DoubleMatrix(vectorHeight, 1);
+        PixelReader targetReader = target.getPixelReader();
+        int midPoint = vectorHeight/2;
+
+
+        for (int y = 0; y < vectorHeight; ++y) {
+
+            int i = y - midPoint;
+
+            if ((imageY+i > 0) && (imageY+i < target.getHeight())) {
+                colors.put(y, 0, colorReader.getColorProperty(targetReader.getColor(imageX, imageY+i)) );
+            }
+            else {
+                colors.put(y, 0, colorReader.getColorProperty(targetReader.getColor(imageX, imageY)));
+            }
+        }
+
         return colors;
     }
 }

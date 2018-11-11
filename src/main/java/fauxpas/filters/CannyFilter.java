@@ -21,47 +21,47 @@ public class CannyFilter implements Filter{
 
         this.horzKernel = new DoubleMatrix(WIDTH, WIDTH);
         this.horzKernel.put(0,0, 0.0);
-        this.horzKernel.put(1, 0, 1.0);
-        this.horzKernel.put(2,0, 0.0);
-        this.horzKernel.put(0,1, 0.0);
-        this.horzKernel.put(1,1, 0.0);
-        this.horzKernel.put(2, 1,0.0);
+        this.horzKernel.put( 0, 1, 1.0);
         this.horzKernel.put(0,2, 0.0);
-        this.horzKernel.put(1,2,1.0);
+        this.horzKernel.put(1,0, 0.0);
+        this.horzKernel.put(1,1, 0.0);
+        this.horzKernel.put(1,2, 0.0);
+        this.horzKernel.put(2,0, 0.0);
+        this.horzKernel.put(2,1,1.0);
         this.horzKernel.put(2,2,0.0);
 
         this.vertKernel = new DoubleMatrix(WIDTH, WIDTH);
         this.vertKernel.put(0,0, 0.0);
-        this.vertKernel.put(0,1,0.0);
-        this.vertKernel.put(0, 2, 0.0);
-        this.vertKernel.put(1, 0, 1.0);
+        this.vertKernel.put(1,0,0.0);
+        this.vertKernel.put(2,0,  0.0);
+        this.vertKernel.put(0,1,  1.0);
         this.vertKernel.put(1,1,0.0);
-        this.vertKernel.put(1,2,1.0);
-        this.vertKernel.put(2, 0,0.0);
-        this.vertKernel.put(2, 1, 0.0);
-        this.vertKernel.put(2, 2, 0.0);
+        this.vertKernel.put(2,1,1.0);
+        this.vertKernel.put(0,2, 0.0);
+        this.vertKernel.put(1,2,  0.0);
+        this.vertKernel.put(2,2,  0.0);
 
         this.posSlopeKernel = new DoubleMatrix(WIDTH, WIDTH);
         this.posSlopeKernel.put(0, 0, 0.0);
-        this.posSlopeKernel.put(0, 1, 0.0);
-        this.posSlopeKernel.put(0,2,1.0);
-        this.posSlopeKernel.put(1, 0, 0.0);
-        this.posSlopeKernel.put(1, 1, 0.0);
-        this.posSlopeKernel.put(1, 2, 0.0);
-        this.posSlopeKernel.put(2, 0, 1.0);
-        this.posSlopeKernel.put(2, 1, 0.0);
-        this.posSlopeKernel.put(2, 2,  0.0);
+        this.posSlopeKernel.put(1,0,  0.0);
+        this.posSlopeKernel.put(2,0,1.0);
+        this.posSlopeKernel.put(0,1,  0.0);
+        this.posSlopeKernel.put(1,1,  0.0);
+        this.posSlopeKernel.put(2,1,  0.0);
+        this.posSlopeKernel.put(0,2,  1.0);
+        this.posSlopeKernel.put(1,2,  0.0);
+        this.posSlopeKernel.put(2,2,   0.0);
 
         this.negSlopeKernel = new DoubleMatrix(WIDTH, WIDTH);
-        this.negSlopeKernel.put(0, 0, 1.0);
-        this.negSlopeKernel.put(0, 1, 0.0);
-        this.negSlopeKernel.put(0, 2, 0.0);
-        this.negSlopeKernel.put(1, 0, 0.0);
-        this.negSlopeKernel.put(1, 1, 0.0);
-        this.negSlopeKernel.put(1, 2, 0.0);
-        this.negSlopeKernel.put(2, 0, 0.0);
-        this.negSlopeKernel.put(2, 1, 0.0);
-        this.negSlopeKernel.put(2, 2, 1.0);
+        this.negSlopeKernel.put(0,0,  1.0);
+        this.negSlopeKernel.put(1,0,  0.0);
+        this.negSlopeKernel.put(2,0,  0.0);
+        this.negSlopeKernel.put(0,1,  0.0);
+        this.negSlopeKernel.put(1,1,  0.0);
+        this.negSlopeKernel.put(2,1,  0.0);
+        this.negSlopeKernel.put(0,2,  0.0);
+        this.negSlopeKernel.put(1,2,  0.0);
+        this.negSlopeKernel.put(2,2,  1.0);
 
         this.upperThreshHold = 0.15;
         this.lowerThreshHold = 0.0001;
@@ -94,19 +94,19 @@ public class CannyFilter implements Filter{
                     //horizontal line
                     if ( ((orientation > 337.5 && orientation <= 360 ) || ( orientation > 0 && orientation <= 22.5 )) ||
                             (orientation > 157.5 && orientation <= 202.5 )) {
-                        kernelSum = horzKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBlue, WIDTH, imageX, imageY)).sum();
+                        kernelSum = horzKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBrightness, WIDTH, imageX, imageY)).sum();
                     }
                     //vertical line
                     else if ( (orientation > 67.5 && orientation >= 112.5) || ( orientation > 247.5 && orientation <= 292.5 ) ) {
-                        kernelSum  = vertKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBlue, WIDTH, imageX, imageY)).sum();
+                        kernelSum  = vertKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBrightness, WIDTH, imageX, imageY)).sum();
                     }
                     //positive slope
                     else if ( (orientation > 22.5 && orientation >= 67.5) || ( orientation > 202.5 && orientation <= 247.5) ) {
-                        kernelSum  = posSlopeKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBlue, WIDTH, imageX, imageY)).sum();
+                        kernelSum  = negSlopeKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBrightness, WIDTH, imageX, imageY)).sum();
                     }
                     //negative slope
                     else if ( (orientation > 112.5 && orientation >= 157.5) || ( orientation > 292.5 && orientation <= 337.5) ) {
-                        kernelSum  = negSlopeKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBlue, WIDTH, imageX, imageY)).sum();
+                        kernelSum  = posSlopeKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBrightness, WIDTH, imageX, imageY)).sum();
                     }
 
                     if (gradient > kernelSum) {
@@ -140,42 +140,42 @@ public class CannyFilter implements Filter{
     public boolean checkSurroundingPixels(Image target, PixelReader targetReader, int imageX, int imageY) {
 
         if (imageX - 1 > 0 && imageY -1 > 0) {
-            if (targetReader.getColor(imageX-1, imageY-1).getBrightness() > this.upperThreshHold ) {
+            if (targetReader.getColor(imageX-1, imageY-1).getBrightness() > this.lowerThreshHold ) {
                 return true;
             }
         }
         else if (imageY - 1 > 0) {
-            if (targetReader.getColor(imageX, imageY-1).getBrightness() > this.upperThreshHold ) {
+            if (targetReader.getColor(imageX, imageY-1).getBrightness() > this.lowerThreshHold ) {
                 return true;
             }
         }
         else if (imageX + 1 < target.getWidth() && imageY -1 > 0) {
-            if (targetReader.getColor(imageX+1, imageY-1).getBrightness() > this.upperThreshHold ) {
+            if (targetReader.getColor(imageX+1, imageY-1).getBrightness() > this.lowerThreshHold ) {
                 return true;
             }
         }
         else if (imageX + 1 < target.getWidth()) {
-            if (targetReader.getColor(imageX+1, imageY).getBrightness() > this.upperThreshHold ) {
+            if (targetReader.getColor(imageX+1, imageY).getBrightness() > this.lowerThreshHold ) {
                 return true;
             }
         }
         else if (imageX + 1 < target.getWidth() && imageY + 1 < target.getHeight()) {
-            if (targetReader.getColor(imageX-1, imageY-1).getBrightness() > this.upperThreshHold ) {
+            if (targetReader.getColor(imageX-1, imageY-1).getBrightness() > this.lowerThreshHold ) {
                 return true;
             }
         }
         else if (imageY + 1 < target.getHeight()) {
-            if (targetReader.getColor(imageX, imageY+1).getBrightness() > this.upperThreshHold ) {
+            if (targetReader.getColor(imageX, imageY+1).getBrightness() > this.lowerThreshHold ) {
                 return true;
             }
         }
         else if (imageX - 1 > 0 && imageY + 1 < target.getHeight()) {
-            if (targetReader.getColor(imageX-1, imageY+1).getBrightness() > this.upperThreshHold ) {
+            if (targetReader.getColor(imageX-1, imageY+1).getBrightness() > this.lowerThreshHold ) {
                 return true;
             }
         }
         else if (imageX - 1 > 0 ) {
-            if (targetReader.getColor(imageX-1, imageY).getBrightness() > this.upperThreshHold ) {
+            if (targetReader.getColor(imageX-1, imageY).getBrightness() > this.lowerThreshHold ) {
                 return true;
             }
         }

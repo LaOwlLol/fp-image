@@ -22,28 +22,34 @@ public class SobelFilter implements Filter {
 
     public SobelFilter() {
         this.horzKernal = new DoubleMatrix(WIDTH, WIDTH);
-        this.horzKernal.put(0,0, -0.5);
-        this.horzKernal.put(1,0, -1);
-        this.horzKernal.put(2,0, -0.5);
-        this.horzKernal.put(0,2, 0.5);
-        this.horzKernal.put(1,2,1);
-        this.horzKernal.put(2,2,0.5);
+        this.horzKernal.put(0,0, -1.0);
+        this.horzKernal.put(0,1, -1);
+        this.horzKernal.put(0,2, -1.0);
+        this.horzKernal.put(2,0, 1.0);
+        this.horzKernal.put(2,1,1);
+        this.horzKernal.put(2,2,1.0);
 
         this.vertKernal = new DoubleMatrix(WIDTH,WIDTH);
-        this.vertKernal.put(0,0, -0.5);
-        this.vertKernal.put(0,1,-1);
-        this.vertKernal.put(0,2, -0.5);
-        this.vertKernal.put(2,0, 0.5);
-        this.vertKernal.put(2,1,1);
-        this.vertKernal.put(2,2,0.5);
+        this.vertKernal.put(0,0, -1.0);
+        this.vertKernal.put(1,0,-1);
+        this.vertKernal.put(2,0, -1.0);
+        this.vertKernal.put(0,2, 1.0);
+        this.vertKernal.put(1,2,1);
+        this.vertKernal.put(2,2,1.0);
 
         this.threshHold = 0.25;
-        this.preserveSaturation = true;
+        this.preserveSaturation = false;
     }
 
     public SobelFilter(double threshHold) {
         this();
         this.threshHold = threshHold;
+    }
+
+    public SobelFilter(double threshHold, boolean preserveSaturation) {
+        this();
+        this.threshHold = threshHold;
+        this.preserveSaturation = preserveSaturation;
     }
 
     @Override
@@ -75,14 +81,18 @@ public class SobelFilter implements Filter {
 
                 //apply
                 if ( gradient > this.threshHold ) {
-                    bufferWriter.setColor(imageX, imageY, Color.hsb( Math.toDegrees(orientation), 1.0,
-                                    Math.min(1.0, gradient),
-                                    preserveSaturation ? targetReader.getColor(imageX, imageY).getOpacity() : 1.0 )
+                    bufferWriter.setColor(imageX, imageY,
+                          Color.hsb( Math.toDegrees(orientation), 1.0,
+                                Math.min(1.0, gradient),
+                                preserveSaturation ? targetReader.getColor(imageX, imageY).getOpacity() : 1.0
+                          )
                     );
                 }
                 else {
                     bufferWriter.setColor(imageX, imageY,
-                            new Color( 0.0, 0.0, 0.0, targetReader.getColor(imageX, imageY).getOpacity())
+                            new Color( 0.0, 0.0, 0.0,
+                                  targetReader.getColor(imageX, imageY).getOpacity()
+                            )
                     );
                 }
             }
