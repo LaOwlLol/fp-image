@@ -14,13 +14,28 @@ public class SobelFilter implements Filter {
 
     private final int WIDTH = 3;
 
-    double threshHold;
-    private DoubleMatrix horzKernal;
-    private DoubleMatrix vertKernal;
+    private final double threshHold;
+    private final DoubleMatrix horzKernal;
+    private final DoubleMatrix vertKernal;
 
-    private boolean preserveSaturation;
+    private final boolean preserveSaturation;
+    private final boolean manhattan;
 
     public SobelFilter() {
+        this(0.2, false, false);
+    }
+
+    public SobelFilter(double threshHold) {
+        this(threshHold, false, false);
+
+    }
+
+    public SobelFilter(double threshHold, boolean preserveSaturation) {
+        this(threshHold, preserveSaturation, false);
+
+    }
+    
+    public SobelFilter(double threshHold, boolean preserveSaturation, boolean manhattan) {
         this.horzKernal = new DoubleMatrix(WIDTH, WIDTH);
         this.horzKernal.put(0,0, -1.0);
         this.horzKernal.put(0,1, -1);
@@ -37,19 +52,9 @@ public class SobelFilter implements Filter {
         this.vertKernal.put(1,2,1);
         this.vertKernal.put(2,2,1.0);
 
-        this.threshHold = 0.25;
-        this.preserveSaturation = false;
-    }
-
-    public SobelFilter(double threshHold) {
-        this();
-        this.threshHold = threshHold;
-    }
-
-    public SobelFilter(double threshHold, boolean preserveSaturation) {
-        this();
         this.threshHold = threshHold;
         this.preserveSaturation = preserveSaturation;
+        this.manhattan = manhattan;
     }
 
     @Override
@@ -77,7 +82,13 @@ public class SobelFilter implements Filter {
                         vertKernal).sum();
 
                 orientation = Math.atan( vertSum/horzSum );
-                gradient = Math.sqrt( Math.pow( vertSum, 2) + Math.pow(horzSum, 2));
+
+                if (manhattan) {
+                    gradient = vertSum + horzSum;
+                }
+                else {
+                    gradient = Math.sqrt(Math.pow(vertSum, 2) + Math.pow(horzSum, 2));
+                }
 
                 //apply
                 if ( gradient > this.threshHold ) {

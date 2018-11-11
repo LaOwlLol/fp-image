@@ -30,9 +30,10 @@ public class RedistributionFilter implements Filter {
             for (int i = 0; i < image.getWidth(); ++i) {
                 Color imageColor = imageReader.getColor(i, j);
                 bufferWriter.setColor(i, j,
-                      new Color(Math.pow( imageColor.getRed(), this.pow ),
-                            Math.pow( imageColor.getGreen(), this.pow ),
-                            Math.pow( imageColor.getBlue(), this.pow ),
+                      new Color(
+                            Math.min(1.0, Math.pow( 10*imageColor.getRed(), this.pow )/10),
+                            Math.min(1.0, Math.pow( 10*imageColor.getGreen(), this.pow )/10),
+                            Math.min(1.0, Math.pow( 10*imageColor.getBlue(), this.pow )/10),
                             imageColor.getOpacity()
                       )
                 );

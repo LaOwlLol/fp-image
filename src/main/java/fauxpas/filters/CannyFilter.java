@@ -14,11 +14,14 @@ public class CannyFilter implements Filter{
     private final DoubleMatrix posSlopeKernel;
     private final DoubleMatrix negSlopeKernel;
     private final int WIDTH = 3;
-    private double lowerThreshHold;
-    private double upperThreshHold;
+    private final double lowerThreshHold;
+    private final double upperThreshHold;
 
     public CannyFilter() {
+        this(0.0001, 0.15 );
+    }
 
+    public CannyFilter(double lowerThreshHold, double upperThreshHold) {
         this.horzKernel = new DoubleMatrix(WIDTH, WIDTH);
         this.horzKernel.put(0,0, 0.0);
         this.horzKernel.put( 0, 1, 1.0);
@@ -63,12 +66,6 @@ public class CannyFilter implements Filter{
         this.negSlopeKernel.put(1,2,  0.0);
         this.negSlopeKernel.put(2,2,  1.0);
 
-        this.upperThreshHold = 0.15;
-        this.lowerThreshHold = 0.0001;
-    }
-
-    public CannyFilter(double upperThreshHold, double lowerThreshHold) {
-        this();
         this.upperThreshHold = upperThreshHold;
         this.lowerThreshHold = lowerThreshHold;
     }
@@ -102,11 +99,11 @@ public class CannyFilter implements Filter{
                     }
                     //positive slope
                     else if ( (orientation > 22.5 && orientation >= 67.5) || ( orientation > 202.5 && orientation <= 247.5) ) {
-                        kernelSum  = negSlopeKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBrightness, WIDTH, imageX, imageY)).sum();
+                        kernelSum  = posSlopeKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBrightness, WIDTH, imageX, imageY)).sum();
                     }
                     //negative slope
                     else if ( (orientation > 112.5 && orientation >= 157.5) || ( orientation > 292.5 && orientation <= 337.5) ) {
-                        kernelSum  = posSlopeKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBrightness, WIDTH, imageX, imageY)).sum();
+                        kernelSum  = negSlopeKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBrightness, WIDTH, imageX, imageY)).sum();
                     }
 
                     if (gradient > kernelSum) {
