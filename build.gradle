@@ -6,6 +6,7 @@
  * user guide available at https://docs.gradle.org/4.3.1/userguide/java_library_plugin.html
  */
 
+version = '0.1.1'
 
 apply plugin: 'java'
 apply plugin: 'java-library'
@@ -37,4 +38,11 @@ dependencies {
 javadoc {
     source = sourceSets.main.allJava
     classpath = configurations.compile
+}
+
+jar {
+    manifest {
+        attributes('Implementation-Title': project.name,
+                'Implementation-Version': project.version)
+    }
 }
