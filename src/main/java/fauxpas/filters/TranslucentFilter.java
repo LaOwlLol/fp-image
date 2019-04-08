@@ -28,7 +28,7 @@ public class TranslucentFilter implements Filter {
                         imageColor.getRed(),
                         imageColor.getGreen(),
                         imageColor.getBlue(),
-                        1.0-alpha));
+                        Math.min( imageColor.getOpacity() ,1.0-alpha ) ));
             }
         }
 
