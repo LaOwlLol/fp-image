@@ -27,7 +27,7 @@ public class BlendFilter implements Mixer{
                           color1.getRed() - (color1.getRed() - color2.getRed())/2,
                           color1.getGreen() - (color1.getGreen() - color2.getGreen())/2,
                           color1.getBlue() - (color1.getBlue() - color2.getBlue())/2,
-                          1.0));
+                        color1.getOpacity() - (color1.getOpacity() - color2.getOpacity())/2 ));
                 }
             }
 

@@ -32,7 +32,7 @@ public class ReflectionFilter implements Mixer{
                             Math.min(1.0, color1.getRed() * color2.getRed() ),
                             Math.min(1.0, color1.getGreen() * color2.getGreen() ),
                             Math.min(1.0, color1.getBlue() * color2.getBlue() ),
-                            1.0));
+                            Math.min(1.0, color1.getOpacity() * color2.getOpacity() ) ));
                 }
             }
 
