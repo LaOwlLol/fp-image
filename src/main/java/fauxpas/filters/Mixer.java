@@ -1,7 +1,9 @@
 package fauxpas.filters;
 
+import javafx.scene.image.Image;
+
 public interface Mixer {
 
-    Filter apply(Filter f1, Filter f2);
+    Image apply(Image s, Image p);
 
 }

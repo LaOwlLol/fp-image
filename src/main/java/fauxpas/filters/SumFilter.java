@@ -22,31 +22,30 @@ public class SumFilter implements Mixer {
     }
 
     @Override
-    public Filter apply(Filter f1, Filter f2) {
-        return image -> {
-            WritableImage buffer = new WritableImage((int)image.getWidth(), (int)image.getHeight());
+    public Image apply(Image s, Image p) {
+
+            WritableImage buffer = new WritableImage((int)s.getWidth(), (int)s.getHeight());
             PixelWriter bufferWriter = buffer.getPixelWriter();
 
-            Image image1 = f1.apply(image);
-            PixelReader reader1 = image1.getPixelReader();
-            Image image2 = f2.apply(image);
-            PixelReader reader2 = image2.getPixelReader();
+            PixelReader reader1 = s.getPixelReader();
+            PixelReader reader2 = p.getPixelReader();
 
-            for (int j = 0; j < image.getHeight(); ++j) {
-                for (int i = 0; i < image.getWidth(); ++i) {
-                    Color color1 = reader1.getColor(i, j);
-                    Color color2 = reader2.getColor(i, j);
+            for (int y = 0; y < buffer.getHeight(); ++y) {
+                for (int x = 0; x < buffer.getWidth(); ++x) {
+                    if (x < p.getWidth() && y < p.getHeight()) {
+                        Color color1 = reader1.getColor(x, y);
+                        Color color2 = reader2.getColor(x, y);
 
-                    bufferWriter.setColor(i, j, new Color(
-                        Math.min(1.0, (this.intensity1 * color1.getRed()) + (this.intensity2 * color2.getRed()) ),
-                        Math.min(1.0, (this.intensity1 * color1.getGreen()) + (this.intensity2 * color2.getGreen())),
-                        Math.min(1.0, (this.intensity1 * color1.getBlue()) + (this.intensity2 * color2.getBlue())),
-                        Math.min(1.0, (this.intensity1 *  color1.getOpacity()) + (this.intensity2 * color2.getOpacity()) )
-                    ));
+                        bufferWriter.setColor(x, y, new Color(
+                                Math.min(1.0, (this.intensity1 * color1.getRed()) + (this.intensity2 * color2.getRed())),
+                                Math.min(1.0, (this.intensity1 * color1.getGreen()) + (this.intensity2 * color2.getGreen())),
+                                Math.min(1.0, (this.intensity1 * color1.getBlue()) + (this.intensity2 * color2.getBlue())),
+                                Math.min(1.0, (this.intensity1 * color1.getOpacity()) + (this.intensity2 * color2.getOpacity()))
+                        ));
+                    }
                 }
             }
 
             return buffer;
-        };
     }
 }
