@@ -1,12 +1,12 @@
 # fp-image
 A simple general purpose image processing library for Java.
 
-### Version 0.1.0
+### Version 0.2.0
 This API provides a filter feature which can be applied to a JavaFX 8 Image wrapped in an object called FilterableImage.
 
 This API provides implementations of Gaussian Blur, Sobel edges, and Canny edges filters. Custom filters can be defined by implementing the functional interface Filter.
 
-The API also provides a way to mix/blend filtered images with the functional interface Mixer.
+The API also provides a way to mix or combine pixel values in two images with the functional interface Mixer.
 
 #### Define an FilterableImage:
 
@@ -34,16 +34,13 @@ noiseImage.applyFilter(new PerlinNoise());
 Mixers blended or sum the color values for the results of two filters. Be sure the return images are the same dimensions.
 
 ```java
-FilterableImage noiseImage = new FilterableImage(myImage);
+FilterableImage s = new FilterableImage(myImage1);
+FilterableImage p = new FilterableImage(myImage1);
+SumFilter sum = new SumFilter(0.2, 0.8);
 
-// blend calculates pixel color channel as color1.getRed() - (color1.getRed() - color2.getRed())/2
-noiseImage.applyFilter( BlendFilter().apply(image -> image , new SimplexNoise(2)) )
-
-noiseImage = new FilterableImage(800, 600);
-noiseImage.applyFilter(new PerlinNoise());
 
 // sum calculates pixel color channel as  (intensity1*color1.getRed()) + (intensity2*color2.getRed())
-noiseImage..applyFilter( SumFilter().apply(image -> image, new SimplexNoise(2)) )
+Image sumImage = sum.apply(s, p);
 ```
 
 #### Gaussian Blur
