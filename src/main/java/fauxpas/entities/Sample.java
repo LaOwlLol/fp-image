@@ -2,9 +2,7 @@ package fauxpas.entities;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
-import javafx.scene.paint.Color;
 
-import java.util.ArrayList;
 import java.util.stream.Stream;
 
 public class Sample {

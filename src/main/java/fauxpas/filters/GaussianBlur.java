@@ -67,18 +67,6 @@ public class GaussianBlur implements Filter {
         WritableImage buffer = new WritableImage((int) target.getWidth(), (int) target.getHeight());
         PixelWriter bufferWriter = buffer.getPixelWriter();
 
-        /*for (int imageY = 0; imageY < target.getHeight(); ++imageY) {
-            for (int imageX = 0; imageX < target.getWidth(); ++imageX) {
-
-                //apply
-                bufferWriter.setColor(imageX, imageY, new Color(
-                      ColorMatrixBuilder.getColorMatrix(target, Color::getRed, this.width, imageX, imageY).mul(this.kernel).sum()/this.kernelValue,
-                        ColorMatrixBuilder.getColorMatrix(target, Color::getGreen, this.width, imageX, imageY).mul(this.kernel).sum()/this.kernelValue,
-                        ColorMatrixBuilder.getColorMatrix(target, Color::getBlue, this.width, imageX, imageY).mul(this.kernel).sum()/this.kernelValue,
-                      targetReader.getColor(imageX, imageY).getOpacity() ) );
-            }
-        }*/
-
         new Range(0, (int) target.getWidth(), 0, (int) target.getHeight() ).get().forEach( c -> {
             bufferWriter.setColor(c.x(), c.y(), new Color(
                     ColorMatrixBuilder.getColorMatrix(target, Color::getRed, this.width, c.x(), c.y()).mul(this.kernel).sum()/this.kernelValue,
