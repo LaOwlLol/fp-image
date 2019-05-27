@@ -25,20 +25,16 @@ public class Sample {
      * @param source Image to read pixels from.
      * @return Stream containing pixel from source image in the area (Range) of this Sample.
      */
-    public Stream<Color> get(Image source) {
+    public Stream<Pixel> get(Image source) {
         PixelReader reader = source.getPixelReader();
         if (this.area == null) {
             this.area = new Range(0, (int )source.getWidth(), 0, (int) source.getHeight());
         }
 
-        ArrayList<Color> pixels = new ArrayList<>( this.area.size() );
-        this.area.get().forEach(c -> {
-            if (c.x() < source.getWidth() && c.y() < source.getHeight()) {
-                pixels.add(reader.getColor(c.x(), c.y()));
-            }
-        } );
+        return this.area.get().filter( c -> (c.x() < source.getWidth() && c.y() < source.getHeight()) ).map(
+                c -> new Pixel( c, reader.getColor(c.x(), c.y()) )
+        );
 
-        return pixels.stream();
     }
 
 }

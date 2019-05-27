@@ -1,6 +1,7 @@
 package fauxpas.entities;
 
 import java.util.ArrayList;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -45,12 +46,11 @@ public class Range implements Selection {
 
     @Override
     public Stream<Coordinate> get() {
-        ArrayList<Coordinate> list = new ArrayList<>(this.size());
-        IntStream.range(x_lower, x_upper).forEach( (x) -> {
-            IntStream.range( y_lower, y_upper ).forEach( (y) -> list.add(new Coordinate(x, y)));
-        } );
-
-        return list.stream();
+        return IntStream.range(x_lower, x_upper).mapToObj(
+                x -> IntStream.range(y_lower, y_upper).mapToObj(
+                        y -> new Coordinate(x, y)
+                )
+        ).flatMap(Function.identity());
     }
 
     /**
