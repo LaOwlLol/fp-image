@@ -40,15 +40,15 @@ public class Range {
     }
 
     public Coordinate topRight() {
-        return new Coordinate(x_upper-1, y_lower);
+        return new Coordinate( x_lower + ( x_upper - x_lower ) , y_lower);
     }
 
     public Coordinate bottomLeft() {
-        return new Coordinate(x_lower, y_upper-1);
+        return new Coordinate(x_lower, y_lower + ( y_upper - y_lower ) );
     }
 
     public Coordinate bottomRight() {
-        return new Coordinate(x_upper-1, y_upper-1);
+        return new Coordinate(x_lower + ( x_upper - x_lower ) , y_lower + ( y_upper - y_lower ));
     }
 
     public Stream<Coordinate> get() {
