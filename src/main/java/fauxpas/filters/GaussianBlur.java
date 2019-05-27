@@ -50,7 +50,7 @@ public class GaussianBlur implements Filter {
             }
         }*/
 
-        new Range(0, 4, 0, 4).get().forEach( c -> {
+        new Range(0, 3, 0, 3).get().forEach( c -> {
             int i = c.x() - mid;
             int j = c.y() - mid;
             double expNumer = Math.pow(i, 2) + Math.pow(j, 2);
