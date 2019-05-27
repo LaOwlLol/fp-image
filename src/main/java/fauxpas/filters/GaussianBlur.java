@@ -55,7 +55,7 @@ public class GaussianBlur implements Filter {
             int j = c.y() - mid;
             double expNumer = Math.pow(i, 2) + Math.pow(j, 2);
             double kvalue = (1.0/outerDenom) * Math.exp(expNumer/expDenom);
-            this.kernel.put(c.x(), c.y(),  kvalue);
+            this.kernel.put(c.y(), c.x(),  kvalue);
             this.kernelValue += kvalue;
         } );
     }
