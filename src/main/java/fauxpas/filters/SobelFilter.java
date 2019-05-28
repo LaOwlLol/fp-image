@@ -1,5 +1,7 @@
 package fauxpas.filters;
 
+import fauxpas.entities.Range;
+import fauxpas.entities.Sample;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
@@ -63,51 +65,48 @@ public class SobelFilter implements Filter {
         //make sure it's gray.
         Image grayImage = new GrayscaleFilter().apply(target);
 
-        PixelReader targetReader = grayImage.getPixelReader();
         WritableImage buffer = new WritableImage((int) target.getWidth(), (int) target.getHeight());
         PixelWriter bufferWriter = buffer.getPixelWriter();
+        PixelReader targetReader = target.getPixelReader();
 
-        double orientation;
-        double horzSum;
-        double vertSum;
-        double gradient;
+        new Range(0, (int) target.getWidth(), 0, (int) target.getHeight()).get().forEach(c -> {
 
-        for (int imageY = 0; imageY < target.getHeight(); ++imageY) {
-            for (int imageX = 0; imageX < target.getWidth(); ++imageX) {
+            double orientation;
+            double horzSum;
+            double vertSum;
+            double gradient;
 
-                //sum pass;
-                horzSum = ColorMatrixBuilder.getColorMatrix(target, Color::getBlue, WIDTH, imageX, imageY).mul(
-                        horzKernal).sum();
-                vertSum = ColorMatrixBuilder.getColorMatrix(target, Color::getBlue, WIDTH, imageX, imageY).mul(
-                        vertKernal).sum();
+            //sum pass;
+            horzSum = ColorMatrixBuilder.getColorMatrix(grayImage, Color::getBlue, WIDTH, c.x(), c.y()).mul(
+                    horzKernal).sum();
+            vertSum = ColorMatrixBuilder.getColorMatrix(grayImage, Color::getBlue, WIDTH, c.x(), c.y()).mul(
+                    vertKernal).sum();
 
-                orientation = Math.atan( vertSum/horzSum );
+            orientation = Math.atan( vertSum/horzSum );
 
-                if (manhattan) {
-                    gradient = vertSum + horzSum;
-                }
-                else {
-                    gradient = Math.sqrt(Math.pow(vertSum, 2) + Math.pow(horzSum, 2));
-                }
-
-                //apply
-                if ( gradient > this.threshHold ) {
-                    bufferWriter.setColor(imageX, imageY,
-                          Color.hsb( Math.toDegrees(orientation), 1.0,
-                                Math.min(1.0, gradient),
-                                preserveSaturation ? targetReader.getColor(imageX, imageY).getOpacity() : 1.0
-                          )
-                    );
-                }
-                else {
-                    bufferWriter.setColor(imageX, imageY,
-                            new Color( 0.0, 0.0, 0.0,
-                                  targetReader.getColor(imageX, imageY).getOpacity()
-                            )
-                    );
-                }
+            if (manhattan) {
+                gradient = vertSum + horzSum;
             }
-        }
+            else {
+                gradient = Math.sqrt(Math.pow(vertSum, 2) + Math.pow(horzSum, 2));
+            }
+
+            //apply
+            if ( gradient > this.threshHold ) {
+                bufferWriter.setColor(c.x(), c.y(),
+                        Color.hsb( Math.toDegrees(orientation),
+                                preserveSaturation ? targetReader.getColor(c.x(), c.y()).getOpacity(): 1.0,
+                                Math.min(1.0, gradient),
+                                targetReader.getColor(c.x(), c.y()).getOpacity()
+                        )
+                );
+            }
+            else {
+                bufferWriter.setColor(c.x(), c.y(),
+                        new Color( 0.0, 0.0, 0.0, targetReader.getColor(c.x(), c.y()).getOpacity() )
+                );
+            }
+        });
 
         return buffer;
     }

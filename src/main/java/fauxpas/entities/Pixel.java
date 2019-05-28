@@ -1,5 +1,6 @@
 package fauxpas.entities;
 
+import fauxpas.filters.ColorReader;
 import javafx.scene.paint.Color;
 
 public class Pixel {
@@ -35,4 +36,9 @@ public class Pixel {
     public double getOpacity() {
         return color.getOpacity();
     }
+
+    public double getProperty(ColorReader cr) {
+        return cr.getColorProperty(this.color);
+    }
+
 }
