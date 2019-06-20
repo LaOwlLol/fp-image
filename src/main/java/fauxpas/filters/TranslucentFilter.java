@@ -1,7 +1,7 @@
 package fauxpas.filters;
 
+import fauxpas.entities.Sample;
 import javafx.scene.image.Image;
-import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
@@ -14,23 +14,17 @@ public class TranslucentFilter implements Filter {
         WritableImage buffer = new WritableImage((int)image.getWidth(), (int)image.getHeight());
         PixelWriter bufferWriter = buffer.getPixelWriter();
 
-        PixelReader imageReader = image.getPixelReader();
+        new Sample().get(image).forEach( p-> {
+            double alpha = Math.min(1.0, (0.3*p.getRed()) +
+                    (0.59 * p.getGreen()) +
+                    (0.11 * p.getBlue()));
 
-        for (int j = 0; j < image.getHeight(); ++j) {
-            for (int i = 0; i < image.getWidth(); ++i) {
-                Color imageColor = imageReader.getColor(i, j);
-
-                double alpha = Math.min(1.0, (0.3*imageColor.getRed()) +
-                        (0.59 * imageColor.getGreen()) +
-                        (0.11 * imageColor.getBlue()));
-
-                bufferWriter.setColor(i, j, new Color(
-                        imageColor.getRed(),
-                        imageColor.getGreen(),
-                        imageColor.getBlue(),
-                        Math.min( imageColor.getOpacity() ,1.0-alpha ) ));
-            }
-        }
+            bufferWriter.setColor(p.x(), p.y(), new Color(
+                    p.getRed(),
+                    p.getGreen(),
+                    p.getBlue(),
+                    Math.min( p.getOpacity(), 1.0-alpha ) ));
+        });
 
         return buffer;
     }

@@ -1,5 +1,6 @@
 package fauxpas.filters;
 
+import fauxpas.entities.Range;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
@@ -38,7 +39,7 @@ public class GaussianBlur implements Filter {
 
         //initialize kernel
         this.kernelValue = 0.0;
-        for (int y = 0; y < width; ++y) {
+        /*for (int y = 0; y < width; ++y) {
             for (int x = 0; x < width; ++x) {
                 int i = x - mid;
                 int j = y - mid;
@@ -47,7 +48,16 @@ public class GaussianBlur implements Filter {
                 this.kernel.put(y, x,  kvalue);
                 this.kernelValue += kvalue;
             }
-        }
+        }*/
+
+        new Range(0, 3, 0, 3).get().forEach( c -> {
+            int i = c.x() - mid;
+            int j = c.y() - mid;
+            double expNumer = Math.pow(i, 2) + Math.pow(j, 2);
+            double kvalue = (1.0/outerDenom) * Math.exp(expNumer/expDenom);
+            this.kernel.put(c.y(), c.x(),  kvalue);
+            this.kernelValue += kvalue;
+        } );
     }
 
     @Override
@@ -57,17 +67,13 @@ public class GaussianBlur implements Filter {
         WritableImage buffer = new WritableImage((int) target.getWidth(), (int) target.getHeight());
         PixelWriter bufferWriter = buffer.getPixelWriter();
 
-        for (int imageY = 0; imageY < target.getHeight(); ++imageY) {
-            for (int imageX = 0; imageX < target.getWidth(); ++imageX) {
-
-                //apply
-                bufferWriter.setColor(imageX, imageY, new Color(
-                      ColorMatrixBuilder.getColorMatrix(target, Color::getRed, this.width, imageX, imageY).mul(this.kernel).sum()/this.kernelValue,
-                        ColorMatrixBuilder.getColorMatrix(target, Color::getGreen, this.width, imageX, imageY).mul(this.kernel).sum()/this.kernelValue,
-                        ColorMatrixBuilder.getColorMatrix(target, Color::getBlue, this.width, imageX, imageY).mul(this.kernel).sum()/this.kernelValue,
-                      targetReader.getColor(imageX, imageY).getOpacity() ) );
-            }
-        }
+        new Range(0, (int) target.getWidth(), 0, (int) target.getHeight() ).get().forEach( c -> {
+            bufferWriter.setColor(c.x(), c.y(), new Color(
+                    ColorMatrixBuilder.getColorMatrix(target, Color::getRed, this.width, c.x(), c.y()).mul(this.kernel).sum()/this.kernelValue,
+                    ColorMatrixBuilder.getColorMatrix(target, Color::getGreen, this.width, c.x(), c.y()).mul(this.kernel).sum()/this.kernelValue,
+                    ColorMatrixBuilder.getColorMatrix(target, Color::getBlue, this.width, c.x(), c.y()).mul(this.kernel).sum()/this.kernelValue,
+                    targetReader.getColor(c.x(), c.y()).getOpacity() ) );
+        }) ;
 
         return buffer;
     }

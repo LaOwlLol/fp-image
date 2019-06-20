@@ -1,6 +1,7 @@
 package fauxpas.filters;
 
 import fauxpas.entities.blenders.ColorProjection;
+import fauxpas.entities.Sample;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
@@ -9,30 +10,21 @@ import javafx.scene.paint.Color;
 
 public class BlendFilter implements Mixer{
     @Override
-    public Image apply(Image s, Image p) {
+    public Image apply(Image f, Image s) {
 
-        WritableImage buffer = new WritableImage((int)s.getWidth(), (int)s.getHeight());
+        WritableImage buffer = new WritableImage((int)f.getWidth(), (int)f.getHeight());
         PixelWriter bufferWriter = buffer.getPixelWriter();
 
-        PixelReader reader1 = s.getPixelReader();
-        PixelReader reader2 = p.getPixelReader();
+        PixelReader reader2 = s.getPixelReader();
 
         ColorProjection blender = new ColorProjection();
 
-        for (int y = 0; y < buffer.getHeight(); ++y) {
-            for (int x = 0; x < buffer.getWidth(); ++x) {
-                if (x < p.getWidth() && y < p.getHeight()) {
+        new Sample().get(f).filter( p -> p.x() < s.getWidth() && p.y() < s.getHeight() ).forEach( p1 -> {
+            Color p2 = reader2.getColor(p1.x(), p1.y());
 
-
-                    Color color1 = reader1.getColor(x, y);
-                    Color color2 = reader2.getColor(x, y);
-
-                    bufferWriter.setColor(x, y, blender.calc(color1, color2));
-                }
-            }
-        }
+            bufferWriter.setColor(p1.x(), p1.y(), blender.calc(p1.getColor(), p2));
+        });
 
         return buffer;
-
     }
 }

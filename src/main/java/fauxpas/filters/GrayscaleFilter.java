@@ -1,31 +1,40 @@
 package fauxpas.filters;
 
+import fauxpas.entities.Sample;
 import javafx.scene.image.Image;
-import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 
 public class GrayscaleFilter implements Filter {
+
+    private double redBalance;
+    private double greenBalance;
+    private double blueBalance;
+
+    public GrayscaleFilter() {
+        this(0.3, 0.59, 0.11);
+    }
+
+    public GrayscaleFilter(double redBalance, double greenBalance, double blueBalance) {
+        this.redBalance = redBalance;
+        this.greenBalance = greenBalance;
+        this.blueBalance = blueBalance;
+    }
+
     @Override
     public Image apply(Image image) {
 
         WritableImage buffer = new WritableImage((int)image.getWidth(), (int)image.getHeight());
         PixelWriter bufferWriter = buffer.getPixelWriter();
 
-        PixelReader imageReader = image.getPixelReader();
+        new Sample().get(image).forEach( p-> {
+            double gray = Math.min(1.0, (redBalance*p.getRed()) +
+                    (greenBalance * p.getGreen()) +
+                    (blueBalance * p.getBlue()));
 
-        for (int j = 0; j < image.getHeight(); ++j) {
-            for (int i = 0; i < image.getWidth(); ++i) {
-                Color imageColor = imageReader.getColor(i, j);
-
-                double gray = Math.min(1.0, (0.3*imageColor.getRed()) +
-                      (0.59 * imageColor.getGreen()) +
-                      (0.11 * imageColor.getBlue()));
-
-                bufferWriter.setColor(i, j, new Color(gray, gray, gray, imageColor.getOpacity()));
-            }
-        }
+            bufferWriter.setColor(p.x(), p.y(), new Color(gray, gray, gray, p.getOpacity()));
+        });
 
         return buffer;
     }

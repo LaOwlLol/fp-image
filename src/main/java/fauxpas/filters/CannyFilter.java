@@ -1,5 +1,6 @@
 package fauxpas.filters;
 
+import fauxpas.entities.Range;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
@@ -72,64 +73,66 @@ public class CannyFilter implements Filter{
 
     @Override
     public Image apply(Image target) {
-        PixelReader targetReader = target.getPixelReader();
+
         WritableImage buffer = new WritableImage((int) target.getWidth(), (int) target.getHeight());
         PixelWriter bufferWriter = buffer.getPixelWriter();
-        double orientation;
+        PixelReader targetReader = target.getPixelReader();
 
-        double kernelSum;
-        double gradient;
 
-        for (int imageY = 0; imageY < target.getHeight(); ++imageY) {
-            for (int imageX = 0; imageX < target.getWidth(); ++imageX) {
-                if (targetReader.getColor(imageX, imageY).getBrightness() != 0.0) {
 
-                    orientation = targetReader.getColor(imageX, imageY).getHue();
-                    gradient = targetReader.getColor(imageX, imageY).getBrightness();
-                    kernelSum = 0.0;
+        new Range(0, (int) target.getWidth(), 0, (int) target.getHeight()).get().forEach( c -> {
+            //double orientation;
+            //double kernelSum;
+            //double gradient;
 
-                    //horizontal line
-                    if ( ((orientation > 337.5 && orientation <= 360 ) || ( orientation > 0 && orientation <= 22.5 )) ||
-                            (orientation > 157.5 && orientation <= 202.5 )) {
-                        kernelSum = horzKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBrightness, WIDTH, imageX, imageY)).sum();
-                    }
-                    //vertical line
-                    else if ( (orientation > 67.5 && orientation >= 112.5) || ( orientation > 247.5 && orientation <= 292.5 ) ) {
-                        kernelSum  = vertKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBrightness, WIDTH, imageX, imageY)).sum();
-                    }
-                    //positive slope
-                    else if ( (orientation > 22.5 && orientation >= 67.5) || ( orientation > 202.5 && orientation <= 247.5) ) {
-                        kernelSum  = posSlopeKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBrightness, WIDTH, imageX, imageY)).sum();
-                    }
-                    //negative slope
-                    else if ( (orientation > 112.5 && orientation >= 157.5) || ( orientation > 292.5 && orientation <= 337.5) ) {
-                        kernelSum  = negSlopeKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBrightness, WIDTH, imageX, imageY)).sum();
-                    }
+            if (targetReader.getColor(c.x(), c.y()).getBrightness() != 0.0) {
 
-                    if (gradient > kernelSum) {
-                        bufferWriter.setColor(imageX, imageY, Color.gray(gradient, targetReader.getColor(imageX, imageY).getOpacity()));
+                double orientation = targetReader.getColor(c.x(), c.y()).getHue();
+                double gradient = targetReader.getColor(c.x(), c.y()).getBrightness();
+                double kernelSum = 0.0;
+
+                //horizontal line
+                if ( ((orientation > 337.5 && orientation <= 360 ) || ( orientation > 0 && orientation <= 22.5 )) ||
+                        (orientation > 157.5 && orientation <= 202.5 )) {
+                    kernelSum = horzKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBrightness, WIDTH, c.x(), c.y())).sum();
+                }
+                //vertical line
+                else if ( (orientation > 67.5 && orientation >= 112.5) || ( orientation > 247.5 && orientation <= 292.5 ) ) {
+                    kernelSum  = vertKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBrightness, WIDTH, c.x(), c.y())).sum();
+                }
+                //positive slope
+                else if ( (orientation > 22.5 && orientation >= 67.5) || ( orientation > 202.5 && orientation <= 247.5) ) {
+                    kernelSum  = posSlopeKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBrightness, WIDTH, c.x(), c.y())).sum();
+                }
+                //negative slope
+                else if ( (orientation > 112.5 && orientation >= 157.5) || ( orientation > 292.5 && orientation <= 337.5) ) {
+                    kernelSum  = negSlopeKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBrightness, WIDTH, c.x(), c.y())).sum();
+                }
+
+                if (gradient > kernelSum) {
+                    bufferWriter.setColor(c.x(), c.y(), Color.gray(gradient, targetReader.getColor(c.x(), c.y()).getOpacity()));
+                }
+                else if (gradient > this.lowerThreshHold) {
+                    if (gradient > this.upperThreshHold) {
+                        bufferWriter.setColor(c.x(), c.y(), Color.gray(gradient, targetReader.getColor(c.x(), c.y()).getOpacity()));
                     }
-                    else if (gradient > this.lowerThreshHold) {
-                        if (gradient > this.upperThreshHold) {
-                            bufferWriter.setColor(imageX, imageY, Color.gray(gradient, targetReader.getColor(imageX, imageY).getOpacity()));
-                        }
-                        else if ( checkSurroundingPixels(target, targetReader, imageX, imageY) ) {
-                            bufferWriter.setColor(imageX, imageY, Color.gray(gradient, targetReader.getColor(imageX, imageY).getOpacity()));
-                        }
-                        else {
-                            bufferWriter.setColor(imageX, imageY, Color.gray(0.0, targetReader.getColor(imageX, imageY).getOpacity()));
-                        }
+                    else if ( checkSurroundingPixels(target, targetReader, c.x(), c.y()) ) {
+                        bufferWriter.setColor(c.x(), c.y(), Color.gray(gradient, targetReader.getColor(c.x(), c.y()).getOpacity()));
                     }
                     else {
-                        bufferWriter.setColor(imageX, imageY, Color.gray(0.0, targetReader.getColor(imageX, imageY).getOpacity()));
+                        bufferWriter.setColor(c.x(), c.y(), Color.gray(0.0, targetReader.getColor(c.x(), c.y()).getOpacity()));
                     }
-
                 }
                 else {
-                    bufferWriter.setColor(imageX, imageY, Color.gray(0.0, targetReader.getColor(imageX, imageY).getOpacity()));
+                    bufferWriter.setColor(c.x(), c.y(), Color.gray(0.0, targetReader.getColor(c.x(), c.y()).getOpacity()));
                 }
+
             }
-        }
+            else {
+                bufferWriter.setColor(c.x(), c.y(), Color.gray(0.0, targetReader.getColor(c.x(), c.y()).getOpacity()));
+            }
+
+        });
 
         return buffer;
     }
