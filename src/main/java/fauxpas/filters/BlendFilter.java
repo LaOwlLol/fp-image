@@ -1,6 +1,6 @@
 package fauxpas.filters;
 
-import fauxpas.entities.blenders.ColorProjection;
+import fauxpas.entities.blenders.ColorMidpoint;
 import fauxpas.entities.Sample;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
@@ -17,7 +17,7 @@ public class BlendFilter implements Mixer{
 
         PixelReader reader2 = s.getPixelReader();
 
-        ColorProjection blender = new ColorProjection();
+        ColorMidpoint blender = new ColorMidpoint();
 
         new Sample().get(f).filter( p -> p.x() < s.getWidth() && p.y() < s.getHeight() ).forEach( p1 -> {
             Color p2 = reader2.getColor(p1.x(), p1.y());
