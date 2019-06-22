@@ -3,12 +3,12 @@ package fauxpas.entities.blenders;
 import javafx.scene.paint.Color;
 
 /**
- * Mid point between two colors.
+ * Composite colors with simple calculation.
  */
 public class SimpleComposite implements Blender{
 
     /**
-     * Calculate the mid point between two colors.
+     * Calculate color composite with mid point calculation.
      * @param color1 starting point
      * @param color2 end point
      * @return subtractive composite c1 - (c1-c2)/2.
