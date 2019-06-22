@@ -1,6 +1,6 @@
 package fauxpas.filters;
 
-import fauxpas.entities.blenders.ColorReflection;
+import fauxpas.entities.blenders.Reflection;
 import fauxpas.entities.Sample;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
@@ -28,7 +28,7 @@ public class ReflectionFilter implements Mixer{
         WritableImage buffer = new WritableImage((int)f.getWidth(), (int)f.getHeight());
         PixelWriter bufferWriter = buffer.getPixelWriter();
 
-        ColorReflection reflection = new ColorReflection();
+        Reflection reflection = new Reflection();
 
         PixelReader reader2 = s.getPixelReader();
 
