@@ -6,6 +6,11 @@ import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 
+/**
+ * Filter colors to gray.
+ *
+ * By default the color balance is 30% red, 59% green, and 11% blue, to approximate human or typical lighting. A constructor for adjusting these values is available.
+ */
 public class GrayscaleFilter implements Filter {
 
     private double redBalance;
@@ -16,6 +21,12 @@ public class GrayscaleFilter implements Filter {
         this(0.3, 0.59, 0.11);
     }
 
+    /**
+     * Create custom color balance for gray-scaling.
+     * @param redBalance
+     * @param greenBalance
+     * @param blueBalance
+     */
     public GrayscaleFilter(double redBalance, double greenBalance, double blueBalance) {
         this.redBalance = redBalance;
         this.greenBalance = greenBalance;
@@ -38,4 +49,5 @@ public class GrayscaleFilter implements Filter {
 
         return buffer;
     }
+
 }

@@ -1,5 +1,8 @@
 package fauxpas.entities;
 
+/**
+ *  An integer pair x and y
+ */
 public class Coordinate {
 
     private int x;

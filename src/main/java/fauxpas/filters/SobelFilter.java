@@ -12,6 +12,17 @@ import org.jblas.DoubleMatrix;
 import java.awt.color.ColorSpace;
 import java.util.Optional;
 
+/**
+ * A sobel operator filter.
+ *
+ * The resulting image will contain colored pixels where the contrast or color gradient is higher than the threshold.  The hue of these pixels will match the direction of the local gradient (gx/gy).  Pixels with gradient below the threshold are colored black.
+ *
+ * The preserve saturation option will apply the original image's saturation at a pixel colored by the sobel operator.
+ *
+ * If the manhattan option is set the threshold with be compared to the l1 norm gx+gy instead of the default l2 norm sqrt(gx^2+gy^2).  This can be an optimization but the resulting image will contain more color pixel which may not be the best result for passing to a canny edge detector.
+ *
+ * This filter should be run on the output of a smoothing or noise reduction filter like a GaussianBlur.
+ */
 public class SobelFilter implements Filter {
 
     private final int WIDTH = 3;
@@ -92,7 +103,7 @@ public class SobelFilter implements Filter {
             }
 
             //apply
-            if ( gradient > this.threshHold ) {
+            if ( Math.abs(gradient - this.threshHold) < Double.MIN_NORMAL ) {
                 bufferWriter.setColor(c.x(), c.y(),
                         Color.hsb( Math.toDegrees(orientation),
                                 preserveSaturation ? targetReader.getColor(c.x(), c.y()).getOpacity(): 1.0,

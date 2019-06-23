@@ -6,6 +6,9 @@ import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 
+/**
+ * A utility filter for manipulating the contrast in an image.
+ */
 public class RedistributionFilter implements Filter {
 
     private final double pow;
@@ -14,6 +17,10 @@ public class RedistributionFilter implements Filter {
         this(2.0);
     }
 
+    /**
+     *
+     * @param power values should be very close to 1.0. power > 1.0 will washout decrease contrast. power < 1.0 will darken the image.
+      */
     public RedistributionFilter(double power) {
         this.pow = power;
     }

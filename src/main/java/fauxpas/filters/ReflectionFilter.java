@@ -8,18 +8,17 @@ import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 
+/**
+ * A filter for simulating a reflection.  The first image will be used as the light source reflected onto a surface defined by the second image (color's of pixels in the second image are the color absorption properties of the surface, including opacity).
+ *
+ * In other words this mixer applies a fauxpas.entities.blenders.Reflection to compute the resulting image from the source images.
+ */
 public class ReflectionFilter implements Mixer{
 
-    private double intensity1;
-    private double intensity2;
+    private Reflection reflection;
 
     public ReflectionFilter() {
-        this(1.0, 1.0);
-    }
-
-    public ReflectionFilter(double intensity1, double intensity2) {
-        this.intensity1 = intensity1;
-        this.intensity2 = intensity2;
+        this.reflection = new Reflection();
     }
 
     @Override
@@ -27,8 +26,6 @@ public class ReflectionFilter implements Mixer{
 
         WritableImage buffer = new WritableImage((int)f.getWidth(), (int)f.getHeight());
         PixelWriter bufferWriter = buffer.getPixelWriter();
-
-        Reflection reflection = new Reflection();
 
         PixelReader reader2 = s.getPixelReader();
 

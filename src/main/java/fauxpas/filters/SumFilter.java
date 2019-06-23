@@ -8,36 +8,31 @@ import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 
+/**
+ * A utility filter for adding two images by summing their pixel colors channels.
+ */
 public class SumFilter implements Mixer {
 
-    private double intensity1;
-    private double intensity2;
+    private ColorSum sum;
 
     public SumFilter() {
-        this(1.0, 1.0);
-    }
-
-    public SumFilter(double intensity1, double intensity2) {
-        this.intensity1 = intensity1;
-        this.intensity2 = intensity2;
+        sum = new ColorSum();
     }
 
     @Override
     public Image apply(Image f, Image s) {
 
-            WritableImage buffer = new WritableImage((int)f.getWidth(), (int)f.getHeight());
-            PixelWriter bufferWriter = buffer.getPixelWriter();
+        WritableImage buffer = new WritableImage((int)f.getWidth(), (int)f.getHeight());
+        PixelWriter bufferWriter = buffer.getPixelWriter();
 
-            ColorSum sum = new ColorSum(this.intensity1, this.intensity2);
+        PixelReader reader2 = s.getPixelReader();
 
-            PixelReader reader2 = s.getPixelReader();
+        new Sample().get(f).filter( p ->  p.x() < s.getWidth() && p.y() < s.getHeight() ).forEach( p1 -> {
+            Color p2 = reader2.getColor(p1.x(), p1.y());
 
-            new Sample().get(f).filter( p ->  p.x() < s.getWidth() && p.y() < s.getHeight() ).forEach( p1 -> {
-                Color p2 = reader2.getColor(p1.x(), p1.y());
+            bufferWriter.setColor(p1.x(), p1.y(), sum.calc(p1.getColor(), p2));
+        });
 
-                bufferWriter.setColor(p1.x(), p1.y(), sum.calc(p1.getColor(), p2));
-            });
-
-            return buffer;
+        return buffer;
     }
 }

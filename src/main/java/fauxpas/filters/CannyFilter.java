@@ -8,6 +8,10 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import org.jblas.DoubleMatrix;
 
+/**
+ * An canny edge filter which implements Non-maximum suppression, Double threshold, and Edge tracking by hysteresis described at https://en.wikipedia.org/wiki/Canny_edge_detector
+ * This filter should be applied to the output of a sobel operator.
+ */
 public class CannyFilter implements Filter{
 
     private final DoubleMatrix horzKernel;
@@ -19,7 +23,7 @@ public class CannyFilter implements Filter{
     private final double upperThreshHold;
 
     public CannyFilter() {
-        this(0.0001, 0.15 );
+        this(0.05, 0.35 );
     }
 
     public CannyFilter(double lowerThreshHold, double upperThreshHold) {
@@ -78,8 +82,6 @@ public class CannyFilter implements Filter{
         PixelWriter bufferWriter = buffer.getPixelWriter();
         PixelReader targetReader = target.getPixelReader();
 
-
-
         new Range(0, (int) target.getWidth(), 0, (int) target.getHeight()).get().forEach( c -> {
             //double orientation;
             //double kernelSum;
@@ -90,6 +92,8 @@ public class CannyFilter implements Filter{
                 double orientation = targetReader.getColor(c.x(), c.y()).getHue();
                 double gradient = targetReader.getColor(c.x(), c.y()).getBrightness();
                 double kernelSum = 0.0;
+
+                //NOTE: for the sake of speed we are ignoring double comparison errors.
 
                 //horizontal line
                 if ( ((orientation > 337.5 && orientation <= 360 ) || ( orientation > 0 && orientation <= 22.5 )) ||
@@ -137,7 +141,7 @@ public class CannyFilter implements Filter{
         return buffer;
     }
 
-    public boolean checkSurroundingPixels(Image target, PixelReader targetReader, int imageX, int imageY) {
+    private boolean checkSurroundingPixels(Image target, PixelReader targetReader, int imageX, int imageY) {
 
         if (imageX - 1 > 0 && imageY -1 > 0) {
             if (targetReader.getColor(imageX-1, imageY-1).getBrightness() > this.lowerThreshHold ) {

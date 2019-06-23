@@ -5,6 +5,9 @@ import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+/**
+ * A two dimensional area that can produce streams of the coordinates covered.
+ */
 public class Range implements Selection {
     
     private int x_lower;
@@ -28,22 +31,37 @@ public class Range implements Selection {
         this.y_upper = y_upper;
     }
 
+    /**
+     * @return Coordinate to the upper left corner of this range.
+     */
     public Coordinate topLeft() {
         return new Coordinate(x_lower, y_lower);
     }
 
+    /**
+     * @return Coordinate to the upper right corner of this range.
+     */
     public Coordinate topRight() {
         return new Coordinate( x_lower + ( x_upper - x_lower ) , y_lower);
     }
 
+    /**
+     * @return Coordinate to the lower left corner of this range.
+     */
     public Coordinate bottomLeft() {
         return new Coordinate(x_lower, y_lower + ( y_upper - y_lower ) );
     }
 
+    /**
+     * @return Coordinate to the lower right corner of this range.
+     */
     public Coordinate bottomRight() {
         return new Coordinate(x_lower + ( x_upper - x_lower ) , y_lower + ( y_upper - y_lower ));
     }
 
+    /**
+     * @return A stream of the coordinates covered by this range.
+     */
     @Override
     public Stream<Coordinate> get() {
         return IntStream.range(x_lower, x_upper).mapToObj(
@@ -54,10 +72,9 @@ public class Range implements Selection {
     }
 
     /**
-     *
-     * @return the area of this 2-d range.
+     * the area of this 2-d range.
+     * @return (xMax - xMin) * (yMax - yMin)
      */
-    @Override
     public int size() {
         return (this.x_upper - this.x_lower) * ( this.y_upper - this.y_lower);
     }

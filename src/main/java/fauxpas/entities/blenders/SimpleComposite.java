@@ -3,22 +3,32 @@ package fauxpas.entities.blenders;
 import javafx.scene.paint.Color;
 
 /**
- * Composite colors with simple calculation.
+ * Composite colors with simple interpolation calculation.
  */
 public class SimpleComposite implements Blender{
+
+    private double bias;
+
+    /**
+     * Construct a composite blender with default bias of 0.5
+     */
+    public SimpleComposite() {
+        this(0.5);
+    }
+
+
+    public SimpleComposite(double bias) {
+        this.bias = bias;
+    }
 
     /**
      * Calculate color composite with mid point calculation.
      * @param color1 starting point
      * @param color2 end point
-     * @return subtractive composite c1 - (c1-c2)/2.
+     * @return color1.interpolate(color2, this.bias)
      */
     @Override
     public Color calc(Color color1, Color color2) {
-        return new Color(
-                Math.max(0.0, color1.getRed() - (color1.getRed() - color2.getRed()) / 2),
-                Math.max(0.0, color1.getGreen() - (color1.getGreen() - color2.getGreen()) / 2),
-                Math.max(0.0, color1.getBlue() - (color1.getBlue() - color2.getBlue()) / 2),
-                Math.max(0.0, color1.getOpacity() - (color1.getOpacity() - color2.getOpacity()) / 2) );
+        return color1.interpolate(color2, this.bias);
     }
 }

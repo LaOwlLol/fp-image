@@ -8,6 +8,9 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import org.jblas.DoubleMatrix;
 
+/**
+ * A utility for reducing noise in images, by averaging each pixel in an image with it's neighbors.
+ */
 public class GaussianBlur implements Filter {
 
     private static final int RED = 0;
@@ -19,6 +22,15 @@ public class GaussianBlur implements Filter {
     private int width;
     private final int mid;
 
+    public GaussianBlur() {
+        this(3, 1.0);
+    }
+
+    /**
+     * Construct gaussian blur filter with custom convolution kernel.
+     * @param width dimension of the convolution kernal.  Should be an odd number. Larger kernel means slower computation.
+     * @param standardDeviation values used to intialize the convolution color. Higher values should mean more smoothing, no computation cost.
+     */
     public GaussianBlur(int width, double standardDeviation) {
 
         //todo all good if no true center to kernel?
@@ -39,16 +51,6 @@ public class GaussianBlur implements Filter {
 
         //initialize kernel
         this.kernelValue = 0.0;
-        /*for (int y = 0; y < width; ++y) {
-            for (int x = 0; x < width; ++x) {
-                int i = x - mid;
-                int j = y - mid;
-                double expNumer = Math.pow(i, 2) + Math.pow(j, 2);
-                double kvalue = (1.0/outerDenom) * Math.exp(expNumer/expDenom);
-                this.kernel.put(y, x,  kvalue);
-                this.kernelValue += kvalue;
-            }
-        }*/
 
         new Range(0, 3, 0, 3).get().forEach( c -> {
             int i = c.x() - mid;
