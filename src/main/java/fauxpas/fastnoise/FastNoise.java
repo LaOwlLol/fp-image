@@ -28,7 +28,6 @@ package fauxpas.fastnoise;
 // off every 'zix'.)
 //
 
-
 /*
  Modified by LaOwlLoL --->  Nate G. to remove dependency on javax.vecMath.*
  */
@@ -36,6 +35,12 @@ package fauxpas.fastnoise;
 //import javax.vecmath.Vector2f;
 //import javax.vecmath.Vector3f;
 
+/**
+ * FastNoise is a MIT Licensed work by Jordan Peck (see full license in the source code).
+ *
+ * This project has reproduced the code and modified it to remove javax.vecmath dependancy.  Any features that required javax.vecmath may be unavailable.
+ * We use FastNoise to generate random values for particular noise filters in package fauxpas.filters.noise;
+ */
 public class FastNoise {
     public enum NoiseType {Value, ValueFractal, Perlin, PerlinFractal, Simplex, SimplexFractal, Cellular, WhiteNoise, Cubic, CubicFractal}
     public enum Interp {Linear, Hermite, Quintic}
