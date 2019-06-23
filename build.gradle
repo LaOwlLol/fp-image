@@ -6,7 +6,7 @@
  * user guide available at https://docs.gradle.org/4.3.1/userguide/java_library_plugin.html
  */
 
-version = '0.3.0'
+version = '0.3.1'
 
 apply plugin: 'java'
 apply plugin: 'java-library'
@@ -27,7 +27,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 
     // https://mvnrepository.com/artifact/org.jblas/jblas
-    compile group: 'org.jblas', name: 'jblas', version: '1.2.4'
+    implementation group: 'org.jblas', name: 'jblas', version: '1.2.4'
     
     //code in FastNoise required this, but it got commented out.
     // https://mvnrepository.com/artifact/javax.vecmath/vecmath
