@@ -7,8 +7,6 @@ import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 
-import javax.annotation.Nullable;
-
 /**
  * Filter the pixels that are within the threshold of the key color.
  *

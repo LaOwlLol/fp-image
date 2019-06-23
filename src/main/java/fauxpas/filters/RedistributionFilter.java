@@ -19,7 +19,7 @@ public class RedistributionFilter implements Filter {
 
     /**
      *
-     * @param power values should be very close to 1.0. power > 1.0 will washout decrease contrast. power < 1.0 will darken the image.
+     * @param power values should be very close to 1.0. power greater than 1.0 will washout decrease contrast. power less than 1.0 will darken the image.
       */
     public RedistributionFilter(double power) {
         this.pow = power;

@@ -15,8 +15,8 @@ public class FilterableImage {
 
     /**
      * Construct with dimensions.
-     * @param width
-     * @param height
+     * @param width horizontal dimension
+     * @param height vertical dimension
      */
     public FilterableImage(int width, int height) {
         this.maintainedImage = new WritableImage(width, height);
@@ -41,7 +41,7 @@ public class FilterableImage {
 
     /**
      * Set the wrapped image.
-     * @param image
+     * @param image replacement pixel source
      */
     public void setImage(Image image) {
         this.maintainedImage = image;
@@ -62,13 +62,13 @@ public class FilterableImage {
      * @param coordinate of the pixel to get
      * @return color of pixel;
      */
-    public Color getPixelColor(Coordinate c) {
-        return maintainedImage.getPixelReader().getColor(c.x(), c.y());
+    public Color getPixelColor(Coordinate coordinate) {
+        return maintainedImage.getPixelReader().getColor(coordinate.x(), coordinate.y());
     }
 
     /**
      * Apply an filter to the wrapped image.
-     * @param filter
+     * @param filter to apply
      */
     public void applyFilter(Filter filter) {
         this.maintainedImage = filter.apply(maintainedImage);

@@ -13,8 +13,8 @@ public class Pixel {
 
     /**
      * Construct a pixel from a coordinate and color
-     * @param coordinate
-     * @param color
+     * @param coordinate location of pixel
+     * @param color pixel display values
      */
     public Pixel(Coordinate coordinate, Color color) {
         this.coordinate = coordinate;

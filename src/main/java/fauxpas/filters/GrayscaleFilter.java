@@ -23,9 +23,9 @@ public class GrayscaleFilter implements Filter {
 
     /**
      * Create custom color balance for gray-scaling.
-     * @param redBalance
-     * @param greenBalance
-     * @param blueBalance
+     * @param redBalance red bias
+     * @param greenBalance green bias
+     * @param blueBalance blue bias
      */
     public GrayscaleFilter(double redBalance, double greenBalance, double blueBalance) {
         this.redBalance = redBalance;
