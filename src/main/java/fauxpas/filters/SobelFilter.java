@@ -121,7 +121,7 @@ public class SobelFilter implements Filter {
             }
 
             //apply
-            if ( Math.abs(gradient - this.threshHold) < Double.MIN_NORMAL ) {
+            if ( gradient > this.threshHold ) {
                 bufferWriter.setColor(c.x(), c.y(),
                         Color.hsb( Math.toDegrees(orientation),
                                 preserveSaturation ? targetReader.getColor(c.x(), c.y()).getOpacity(): 1.0,
