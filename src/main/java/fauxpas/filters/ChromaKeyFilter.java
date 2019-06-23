@@ -58,7 +58,7 @@ public class ChromaKeyFilter implements Filter {
     private ChromaKeyFilter(Color key_color, Color source_color, Image source_image, double threshold) {
         this.key_color = key_color;
         this.source_color = source_color;
-        this.source_image = source_image.getPixelReader();
+        this.source_image = ((source_image != null) ? source_image.getPixelReader() : null);
         this.threshold = threshold;
     }
 
