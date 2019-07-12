@@ -19,16 +19,12 @@
 package fauxpas.filters;
 
 import fauxpas.entities.Range;
-import fauxpas.entities.Sample;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import org.jblas.DoubleMatrix;
-
-import java.awt.color.ColorSpace;
-import java.util.Optional;
 
 /**
  * A sobel operator filter.
@@ -106,9 +102,9 @@ public class SobelFilter implements Filter {
             double gradient;
 
             //sum pass;
-            horzSum = ColorMatrixBuilder.getColorMatrix(grayImage, Color::getBlue, WIDTH, c.x(), c.y()).mul(
+            horzSum = ColorMatrixBuilder.getNeighborColorMatrix(grayImage, Color::getBlue, WIDTH, c.x(), c.y()).mul(
                     horzKernal).sum();
-            vertSum = ColorMatrixBuilder.getColorMatrix(grayImage, Color::getBlue, WIDTH, c.x(), c.y()).mul(
+            vertSum = ColorMatrixBuilder.getNeighborColorMatrix(grayImage, Color::getBlue, WIDTH, c.x(), c.y()).mul(
                     vertKernal).sum();
 
             orientation = Math.atan( vertSum/horzSum );

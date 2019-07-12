@@ -25,30 +25,20 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 
 /**
- * Filter colors to gray.
+ * A filter for transforming the luminance of a pixels to transparency.  Meaning pixels close to white (or the gray balance provided by a GrayscaleFilter), become transparent
  *
- * By default the color balance is 30% red, 59% green, and 11% blue, to approximate human or typical lighting. A constructor for adjusting these values is available.
+ * By default luminance is calculated with a gray scale filter color balance, but you can provide a custom color balance gray scale filter.
  */
-public class GrayscaleFilter implements Filter {
+public class ChromaLuminanceFilter implements Filter {
 
-    private double redBalance;
-    private double greenBalance;
-    private double blueBalance;
+    GrayscaleFilter grayFilter;
 
-    public GrayscaleFilter() {
-        this(0.3, 0.59, 0.11);
+    public ChromaLuminanceFilter() {
+        this(new GrayscaleFilter());
     }
 
-    /**
-     * Create custom color balance for gray-scaling.
-     * @param redBalance red bias
-     * @param greenBalance green bias
-     * @param blueBalance blue bias
-     */
-    public GrayscaleFilter(double redBalance, double greenBalance, double blueBalance) {
-        this.redBalance = redBalance;
-        this.greenBalance = greenBalance;
-        this.blueBalance = blueBalance;
+    public ChromaLuminanceFilter(GrayscaleFilter grayscaleFilter) {
+        this.grayFilter = grayscaleFilter;
     }
 
     @Override
@@ -57,11 +47,13 @@ public class GrayscaleFilter implements Filter {
         WritableImage buffer = new WritableImage((int)image.getWidth(), (int)image.getHeight());
         PixelWriter bufferWriter = buffer.getPixelWriter();
 
-        new Sample().get(image).forEach( p-> {
-            double gray = Math.min(1.0, ColorMatrixBuilder.getColorColumnVector(p.getColor()).dot(
-                ColorMatrixBuilder.getColorColumnVector(new Color(this.redBalance, this.greenBalance, this.blueBalance, 1.0)) ) );
+        new Sample().get(grayFilter.apply(image)).forEach( p-> {
 
-            bufferWriter.setColor(p.x(), p.y(), new Color(gray, gray, gray, p.getOpacity()));
+            bufferWriter.setColor(p.x(), p.y(), new Color(
+                    p.getRed(),
+                    p.getGreen(),
+                    p.getBlue(),
+                    Math.min( p.getOpacity(), 1.0-p.getRed() ) ));
         });
 
         return buffer;

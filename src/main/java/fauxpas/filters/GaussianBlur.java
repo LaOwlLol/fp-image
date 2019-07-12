@@ -89,9 +89,9 @@ public class GaussianBlur implements Filter {
 
         new Range(0, (int) target.getWidth(), 0, (int) target.getHeight() ).get().forEach( c -> {
             bufferWriter.setColor(c.x(), c.y(), new Color(
-                    ColorMatrixBuilder.getColorMatrix(target, Color::getRed, this.width, c.x(), c.y()).mul(this.kernel).sum()/this.kernelValue,
-                    ColorMatrixBuilder.getColorMatrix(target, Color::getGreen, this.width, c.x(), c.y()).mul(this.kernel).sum()/this.kernelValue,
-                    ColorMatrixBuilder.getColorMatrix(target, Color::getBlue, this.width, c.x(), c.y()).mul(this.kernel).sum()/this.kernelValue,
+                    ColorMatrixBuilder.getNeighborColorMatrix(target, Color::getRed, this.width, c.x(), c.y()).mul(this.kernel).sum()/this.kernelValue,
+                    ColorMatrixBuilder.getNeighborColorMatrix(target, Color::getGreen, this.width, c.x(), c.y()).mul(this.kernel).sum()/this.kernelValue,
+                    ColorMatrixBuilder.getNeighborColorMatrix(target, Color::getBlue, this.width, c.x(), c.y()).mul(this.kernel).sum()/this.kernelValue,
                     targetReader.getColor(c.x(), c.y()).getOpacity() ) );
         }) ;
 

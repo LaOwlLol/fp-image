@@ -116,19 +116,19 @@ public class CannyFilter implements Filter{
                 //horizontal line
                 if ( ((orientation > 337.5 && orientation <= 360 ) || ( orientation > 0 && orientation <= 22.5 )) ||
                         (orientation > 157.5 && orientation <= 202.5 )) {
-                    kernelSum = horzKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBrightness, WIDTH, c.x(), c.y())).sum();
+                    kernelSum = horzKernel.mul(ColorMatrixBuilder.getNeighborColorMatrix(target, Color::getBrightness, WIDTH, c.x(), c.y())).sum();
                 }
                 //vertical line
                 else if ( (orientation > 67.5 && orientation >= 112.5) || ( orientation > 247.5 && orientation <= 292.5 ) ) {
-                    kernelSum  = vertKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBrightness, WIDTH, c.x(), c.y())).sum();
+                    kernelSum  = vertKernel.mul(ColorMatrixBuilder.getNeighborColorMatrix(target, Color::getBrightness, WIDTH, c.x(), c.y())).sum();
                 }
                 //positive slope
                 else if ( (orientation > 22.5 && orientation >= 67.5) || ( orientation > 202.5 && orientation <= 247.5) ) {
-                    kernelSum  = posSlopeKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBrightness, WIDTH, c.x(), c.y())).sum();
+                    kernelSum  = posSlopeKernel.mul(ColorMatrixBuilder.getNeighborColorMatrix(target, Color::getBrightness, WIDTH, c.x(), c.y())).sum();
                 }
                 //negative slope
                 else if ( (orientation > 112.5 && orientation >= 157.5) || ( orientation > 292.5 && orientation <= 337.5) ) {
-                    kernelSum  = negSlopeKernel.mul(ColorMatrixBuilder.getColorMatrix(target, Color::getBrightness, WIDTH, c.x(), c.y())).sum();
+                    kernelSum  = negSlopeKernel.mul(ColorMatrixBuilder.getNeighborColorMatrix(target, Color::getBrightness, WIDTH, c.x(), c.y())).sum();
                 }
 
                 if (gradient > kernelSum) {

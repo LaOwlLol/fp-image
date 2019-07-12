@@ -20,11 +20,12 @@ package fauxpas.filters;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
+import javafx.scene.paint.Color;
 import org.jblas.DoubleMatrix;
 
 public class ColorMatrixBuilder {
 
-    public static DoubleMatrix getColorMatrix(Image target, ColorReader colorReader, int kernelWidth, int imageX, int imageY ) {
+    public static DoubleMatrix getNeighborColorMatrix(Image target, ColorReader colorReader, int kernelWidth, int imageX, int imageY ) {
         DoubleMatrix colors = new DoubleMatrix(kernelWidth, kernelWidth);
         PixelReader targetReader = target.getPixelReader();
         int midPoint = kernelWidth/2;
@@ -46,7 +47,7 @@ public class ColorMatrixBuilder {
         return colors;
     }
 
-    public static DoubleMatrix getColorColumnVector(Image target, ColorReader colorReader, int vectorHeight, int imageX, int imageY ) {
+    public static DoubleMatrix getNeighborColorColumnVector(Image target, ColorReader colorReader, int vectorHeight, int imageX, int imageY ) {
         DoubleMatrix colors = new DoubleMatrix(vectorHeight, 1);
         PixelReader targetReader = target.getPixelReader();
         int midPoint = vectorHeight/2;
@@ -65,5 +66,21 @@ public class ColorMatrixBuilder {
         }
 
         return colors;
+    }
+
+    public static DoubleMatrix getColorColumnVector(Color color) {
+        DoubleMatrix vector = new DoubleMatrix(3, 1);
+        vector.put(0,0, color.getRed() );
+        vector.put(1, 0, color.getGreen() );
+        vector.put( 2, 0, color.getBlue() );
+        return vector;
+    }
+
+    public static DoubleMatrix getColorRowVector(Color color) {
+        DoubleMatrix vector = new DoubleMatrix(1, 3);
+        vector.put(0,0, color.getRed() );
+        vector.put(0, 1, color.getGreen() );
+        vector.put( 0, 2, color.getBlue() );
+        return vector;
     }
 }
