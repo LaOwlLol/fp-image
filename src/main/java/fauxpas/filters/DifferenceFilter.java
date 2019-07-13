@@ -37,6 +37,7 @@ public class DifferenceFilter implements Mixer {
     private Color equal;
     private Color diff;
     private boolean manhattan;
+    private boolean appliedToEqual;
 
 
     /**
@@ -67,6 +68,11 @@ public class DifferenceFilter implements Mixer {
         this.diff = diff;
         this.threshold = threshold;
         this.manhattan = manhattan;
+        this.appliedToEqual = false;
+    }
+
+    public boolean appliedToEqual() {
+        return appliedToEqual;
     }
 
     @Override
@@ -74,8 +80,9 @@ public class DifferenceFilter implements Mixer {
         WritableImage buffer = new WritableImage((int)f.getWidth(), (int)f.getHeight());
         PixelWriter bufferWriter = buffer.getPixelWriter();
         PixelReader sr = s.getPixelReader();
+        this.appliedToEqual = true;
 
-        new Sample().get(f).forEach(p -> {
+        new Sample().get(f).filter( p ->  p.x() < s.getWidth() && p.y() < s.getHeight() ).forEach(p -> {
             double delta;
             if (!manhattan) {
                 delta = ColorMatrixBuilder.getColorColumnVector(p.getColor())
@@ -92,6 +99,7 @@ public class DifferenceFilter implements Mixer {
                 bufferWriter.setColor(p.x(), p.y(), equal);
             } else {
                 bufferWriter.setColor(p.x(), p.y(), diff);
+                this.appliedToEqual = false;
             }
         });
 
