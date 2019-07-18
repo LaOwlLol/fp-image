@@ -110,18 +110,18 @@ public class SobelFilter implements Filter {
             orientation = (float) Math.atan( vertSum/horzSum );
 
             if (manhattan) {
-                gradient = vertSum + horzSum;
+                gradient = ColorHelper.GradientNormalize( vertSum + horzSum );
             }
             else {
-                gradient = (float) Math.sqrt(Math.pow(vertSum, 2) + Math.pow(horzSum, 2));
+                gradient =  ColorHelper.GradientNormalize((float) Math.sqrt(Math.pow(vertSum, 2) + Math.pow(horzSum, 2)));
             }
 
             //apply
             if ( gradient > this.threshHold ) {
                 buffer.setRGB(c.x(), c.y(),
                     Color.HSBtoRGB( orientation,
-                        Math.min(1.0f, gradient ),
-                        ColorHelper.Brightness(image.getRGB(c.x(), c.y()))
+                        (preserveSaturation) ? ColorHelper.Saturation(image.getRGB(c.x(), c.y())) : 1.0f,
+                        Math.min(1.0f, gradient )
                     )
                 );
             }

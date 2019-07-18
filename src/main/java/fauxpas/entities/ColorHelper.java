@@ -73,4 +73,8 @@ public class ColorHelper {
     public static int FloatChannelToInt(float f) {
         return (int) (f * 255);
     }
+
+    public static float GradientNormalize(float v) {
+        return ((1.0f / (1.0f + (float) Math.exp(-v))) * 2.0f) - 1.0f;
+    }
 }
