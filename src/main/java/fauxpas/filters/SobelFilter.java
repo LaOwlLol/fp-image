@@ -120,8 +120,8 @@ public class SobelFilter implements Filter {
             if ( gradient > this.threshHold ) {
                 buffer.setRGB(c.x(), c.y(),
                     Color.HSBtoRGB( orientation,
-                        ColorHelper.Saturation(image.getRGB(c.x(), c.y())),
-                        Math.min(1.0f, gradient )
+                        Math.min(1.0f, gradient ),
+                        ColorHelper.Brightness(image.getRGB(c.x(), c.y()))
                     )
                 );
             }

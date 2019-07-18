@@ -105,7 +105,7 @@ public class CannyFilter implements Filter{
             if (ColorHelper.Brightness(color) != 0.0) {
 
                 float orientation = ColorHelper.Hue( color );
-                float gradient =  ColorHelper.Brightness( color ) ;
+                float gradient =  ColorHelper.Saturation( color ) ;
                 double kernelSum = 0.0;
                 int gray = ColorHelper.FloatChannelToInt(gradient);
 
