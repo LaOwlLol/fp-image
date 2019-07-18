@@ -18,13 +18,14 @@
 
 package fauxpas.filters;
 
+import fauxpas.entities.ColorHelper;
+import fauxpas.entities.ImageHelper;
 import fauxpas.entities.blenders.Reflection;
 import fauxpas.entities.Sample;
-import javafx.scene.image.Image;
-import javafx.scene.image.PixelReader;
-import javafx.scene.image.PixelWriter;
-import javafx.scene.image.WritableImage;
-import javafx.scene.paint.Color;
+
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+
 
 /**
  * A filter for simulating a reflection.  The first image will be used as the light source reflected onto a surface defined by the second image (color's of pixels in the second image are the color absorption properties of the surface, including opacity).
@@ -40,17 +41,14 @@ public class ReflectionFilter implements Mixer{
     }
 
     @Override
-    public Image apply(Image f, Image s) {
+    public BufferedImage apply(BufferedImage f, BufferedImage s) {
 
-        WritableImage buffer = new WritableImage((int)f.getWidth(), (int)f.getHeight());
-        PixelWriter bufferWriter = buffer.getPixelWriter();
-
-        PixelReader reader2 = s.getPixelReader();
+        BufferedImage buffer = ImageHelper.AllocateARGBBuffer(f.getWidth(), f.getHeight());
 
         new Sample().get(f).filter( p -> p.x() < s.getWidth() && p.y() < s.getHeight()).forEach( p1 -> {
-            Color p2 = reader2.getColor(p1.x(), p1.y());
+            Color p2 = ColorHelper.ColorFromRGBValue( s.getRGB(p1.x(), p1.y()) );
 
-            bufferWriter.setColor(p1.x(), p1.y(), reflection.calc(p1.getColor(), p2));
+            buffer.setRGB(p1.x(), p1.y(), reflection.calc(p1.getColor(), p2).getRGB());
         });
 
         return buffer;

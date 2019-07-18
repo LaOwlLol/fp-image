@@ -20,16 +20,16 @@ package fauxpas.entities;
 
 import fauxpas.filters.Filter;
 import fauxpas.filters.noise.WhiteNoise;
-import javafx.scene.image.Image;
-import javafx.scene.image.WritableImage;
-import javafx.scene.paint.Color;
+
+import java.awt.image.BufferedImage;
+
 
 /**
  * A wrapper for javafx.scene.image.Image to apply fauxpas.filters to.
  */
 public class FilterableImage {
 
-    private Image maintainedImage;
+    private BufferedImage maintainedImage;
 
     /**
      * Construct with dimensions.
@@ -37,7 +37,7 @@ public class FilterableImage {
      * @param height vertical dimension
      */
     public FilterableImage(int width, int height) {
-        this.maintainedImage = new WritableImage(width, height);
+        this.maintainedImage = ImageHelper.AllocateARGBBuffer(width, height);
         this.applyFilter(new WhiteNoise());
     }
 
@@ -45,7 +45,7 @@ public class FilterableImage {
      * Construct by wrapping an existing image.
      * @param maintainedImage The image to wrap.
      */
-    public FilterableImage(Image maintainedImage) {
+    public FilterableImage(BufferedImage maintainedImage) {
         this.maintainedImage = maintainedImage;
     }
 
@@ -53,7 +53,7 @@ public class FilterableImage {
      * Access image
      * @return The image wrapped.
      */
-    public Image getImage() {
+    public BufferedImage getImage() {
         return maintainedImage;
     }
 
@@ -61,7 +61,7 @@ public class FilterableImage {
      * Set the wrapped image.
      * @param image replacement pixel source
      */
-    public void setImage(Image image) {
+    public void setImage(BufferedImage image) {
         this.maintainedImage = image;
     }
 
@@ -71,8 +71,8 @@ public class FilterableImage {
      * @param y coordinate of the pixel to get
      * @return color of pixel;
      */
-    public Color getPixelColor(int x, int y) {
-        return maintainedImage.getPixelReader().getColor(x, y);
+    public int getPixelColor(int x, int y) {
+        return maintainedImage.getRGB(x, y);
     }
 
     /**
@@ -80,8 +80,8 @@ public class FilterableImage {
      * @param coordinate of the pixel to get
      * @return color of pixel;
      */
-    public Color getPixelColor(Coordinate coordinate) {
-        return maintainedImage.getPixelReader().getColor(coordinate.x(), coordinate.y());
+    public int getPixelColor(Coordinate coordinate) {
+        return maintainedImage.getRGB(coordinate.x(), coordinate.y());
     }
 
     /**

@@ -18,13 +18,15 @@
 
 package fauxpas.filters;
 
+import fauxpas.entities.ColorHelper;
+import fauxpas.entities.ColorMatrixBuilder;
+import fauxpas.entities.ImageHelper;
 import fauxpas.entities.Range;
-import javafx.scene.image.Image;
-import javafx.scene.image.PixelReader;
-import javafx.scene.image.PixelWriter;
-import javafx.scene.image.WritableImage;
-import javafx.scene.paint.Color;
+
 import org.jblas.DoubleMatrix;
+
+import java.awt.*;
+import java.awt.image.BufferedImage;
 
 /**
  * A sobel operator filter.
@@ -85,50 +87,50 @@ public class SobelFilter implements Filter {
     }
 
     @Override
-    public Image apply(Image target) {
+    public BufferedImage apply(BufferedImage image) {
 
         //make sure it's gray.
-        Image grayImage = new GrayscaleFilter().apply(target);
+        BufferedImage grayImage = new GrayscaleFilter().apply(image);
 
-        WritableImage buffer = new WritableImage((int) target.getWidth(), (int) target.getHeight());
-        PixelWriter bufferWriter = buffer.getPixelWriter();
-        PixelReader targetReader = target.getPixelReader();
+        BufferedImage buffer = ImageHelper.AllocateARGBBuffer(image.getWidth(), image.getHeight());
 
-        new Range(0, (int) target.getWidth(), 0, (int) target.getHeight()).get().forEach(c -> {
+        new Range(0, image.getWidth(), 0, image.getHeight()).get().forEach(c -> {
 
-            double orientation;
-            double horzSum;
-            double vertSum;
-            double gradient;
+            float orientation;
+            float horzSum;
+            float vertSum;
+            float gradient;
 
             //sum pass;
-            horzSum = ColorMatrixBuilder.getNeighborColorMatrix(grayImage, Color::getBlue, WIDTH, c.x(), c.y()).mul(
+            horzSum = (float) ColorMatrixBuilder.getNeighborColorMatrix(grayImage, (color) -> color.getBlue(), WIDTH, c.x(), c.y()).mul(
                     horzKernal).sum();
-            vertSum = ColorMatrixBuilder.getNeighborColorMatrix(grayImage, Color::getBlue, WIDTH, c.x(), c.y()).mul(
+            vertSum = (float) ColorMatrixBuilder.getNeighborColorMatrix(grayImage, (color) -> color.getBlue(), WIDTH, c.x(), c.y()).mul(
                     vertKernal).sum();
 
-            orientation = Math.atan( vertSum/horzSum );
+            orientation = (float) Math.atan( vertSum/horzSum );
 
             if (manhattan) {
                 gradient = vertSum + horzSum;
             }
             else {
-                gradient = Math.sqrt(Math.pow(vertSum, 2) + Math.pow(horzSum, 2));
+                gradient = (float) Math.sqrt(Math.pow(vertSum, 2) + Math.pow(horzSum, 2));
             }
 
             //apply
             if ( gradient > this.threshHold ) {
-                bufferWriter.setColor(c.x(), c.y(),
-                        Color.hsb( Math.toDegrees(orientation),
-                                preserveSaturation ? targetReader.getColor(c.x(), c.y()).getOpacity(): 1.0,
-                                Math.min(1.0, gradient),
-                                targetReader.getColor(c.x(), c.y()).getOpacity()
-                        )
+                buffer.setRGB(c.x(), c.y(),
+                    Color.HSBtoRGB( (float) Math.toDegrees(orientation),
+                        ColorHelper.Saturation(image.getRGB(c.x(), c.y())),
+                        Math.min(1.0f, gradient)
+                    )
                 );
             }
             else {
-                bufferWriter.setColor(c.x(), c.y(),
-                        new Color( 0.0, 0.0, 0.0, targetReader.getColor(c.x(), c.y()).getOpacity() )
+                buffer.setRGB(c.x(), c.y(),
+                        ColorHelper.ColorValueFromRGBA(
+                            0, 0, 0,
+                            ColorHelper.ColorFromRGBValue( image.getRGB(c.x(), c.y()) ).getAlpha()
+                        )
                 );
             }
         });

@@ -18,12 +18,13 @@
 
 package fauxpas.filters;
 
+import fauxpas.entities.ColorHelper;
+import fauxpas.entities.ImageHelper;
 import fauxpas.entities.Sample;
-import javafx.scene.image.Image;
-import javafx.scene.image.PixelReader;
-import javafx.scene.image.PixelWriter;
-import javafx.scene.image.WritableImage;
-import javafx.scene.paint.Color;
+
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+
 
 /**
  * Filter the pixels that are within the threshold of the key color.
@@ -36,7 +37,7 @@ public class ChromaKeyFilter implements Filter {
 
     private Color key_color;
     private Color source_color;
-    private PixelReader source_image;
+    private BufferedImage source_image;
     private double threshold;
 
     public ChromaKeyFilter() {
@@ -51,22 +52,21 @@ public class ChromaKeyFilter implements Filter {
         this(key_color, source_color, null, threshold);
     }
 
-    public ChromaKeyFilter(Color key_color, Image source_image, double threshold) {
+    public ChromaKeyFilter(Color key_color, BufferedImage source_image, double threshold) {
         this(key_color, null, source_image, threshold);
     }
 
-    private ChromaKeyFilter(Color key_color, Color source_color, Image source_image, double threshold) {
+    private ChromaKeyFilter(Color key_color, Color source_color, BufferedImage source_image, double threshold) {
         this.key_color = key_color;
         this.source_color = source_color;
-        this.source_image = ((source_image != null) ? source_image.getPixelReader() : null);
+        this.source_image = ((source_image != null) ? source_image : null);
         this.threshold = threshold;
     }
 
     @Override
-    public Image apply(Image image) {
+    public BufferedImage apply(BufferedImage image) {
 
-        WritableImage buffer = new WritableImage((int)image.getWidth(), (int)image.getHeight());
-        PixelWriter bufferWriter = buffer.getPixelWriter();
+        BufferedImage buffer = ImageHelper.AllocateARGBBuffer(image.getWidth(), image.getHeight());
 
         new Sample().get(image).forEach( p -> {
             double delta = Math.min(1.0, (Math.pow(key_color.getRed() - p.getRed(), 2) +
@@ -75,17 +75,17 @@ public class ChromaKeyFilter implements Filter {
 
             if (delta < threshold) {
                 if ( source_image != null ) {
-                    bufferWriter.setColor(p.x(), p.y(), source_image.getColor(p.x(), p.y()));
+                    buffer.setRGB(p.x(), p.y(), source_image.getRGB(p.x(), p.y()));
                 }
                 else if (source_color != null) {
-                    bufferWriter.setColor(p.x(), p.y(), source_color);
+                    buffer.setRGB(p.x(), p.y(), source_color.getRGB());
                 }
                 else {
-                    bufferWriter.setColor(p.x(), p.y(), new Color(p.getRed(), p.getGreen(), p.getBlue(), 0.0));
+                    buffer.setRGB(p.x(), p.y(), ColorHelper.ColorValueFromRGBA(p.getRed(), p.getGreen(), p.getBlue(), 0));
                 }
             }
             else {
-                bufferWriter.setColor(p.x(), p.y(), p.getColor());
+                buffer.setRGB(p.x(), p.y(), p.getColor().getRGB());
             }
         });
 

@@ -18,11 +18,12 @@
 
 package fauxpas.filters;
 
+import fauxpas.entities.ColorHelper;
+import fauxpas.entities.ImageHelper;
 import fauxpas.entities.Sample;
-import javafx.scene.image.Image;
-import javafx.scene.image.PixelWriter;
-import javafx.scene.image.WritableImage;
-import javafx.scene.paint.Color;
+
+import java.awt.image.BufferedImage;
+
 
 /**
  * Filter colors to gray.
@@ -52,16 +53,14 @@ public class GrayscaleFilter implements Filter {
     }
 
     @Override
-    public Image apply(Image image) {
+    public BufferedImage apply(BufferedImage image) {
 
-        WritableImage buffer = new WritableImage((int)image.getWidth(), (int)image.getHeight());
-        PixelWriter bufferWriter = buffer.getPixelWriter();
+        BufferedImage buffer = ImageHelper.AllocateARGBBuffer(image.getWidth(), image.getHeight());
 
         new Sample().get(image).forEach( p-> {
-            double gray = Math.min(1.0, ColorMatrixBuilder.getColorColumnVector(p.getColor()).dot(
-                ColorMatrixBuilder.getColorColumnVector(new Color(this.redBalance, this.greenBalance, this.blueBalance, 1.0)) ) );
+            int gray = ColorHelper.Luminance( p.getColor(), this.redBalance, this.greenBalance, this.blueBalance );
 
-            bufferWriter.setColor(p.x(), p.y(), new Color(gray, gray, gray, p.getOpacity()));
+            buffer.setRGB(p.x(), p.y(), ColorHelper.ColorValueFromRGBA(gray, gray, gray, p.getOpacity()));
         });
 
         return buffer;

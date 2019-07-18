@@ -18,13 +18,13 @@
 
 package fauxpas.filters.noise;
 
+import fauxpas.entities.ColorHelper;
+import fauxpas.entities.ImageHelper;
+import fauxpas.entities.Range;
 import fauxpas.fastnoise.FastNoise;
 import fauxpas.filters.Filter;
-import javafx.scene.image.Image;
-import javafx.scene.image.PixelWriter;
-import javafx.scene.image.WritableImage;
-import javafx.scene.paint.Color;
 
+import java.awt.image.BufferedImage;
 import java.util.Random;
 
 public class CellularNoise implements Filter {
@@ -53,17 +53,15 @@ public class CellularNoise implements Filter {
     }
 
     @Override
-    public Image apply(Image image) {
+    public BufferedImage apply(BufferedImage image) {
 
-        WritableImage buffer = new WritableImage((int)image.getWidth(), (int)image.getHeight());
-        PixelWriter bufferWriter = buffer.getPixelWriter();
+        BufferedImage buffer = ImageHelper.AllocateARGBBuffer(image.getWidth(), image.getHeight());
 
-        for (int j = 0; j < image.getHeight(); ++j) {
-            for (int i = 0; i < image.getWidth(); ++i) {
-                double color =  (this.fastNoise.GetNoise(this.frequencyX * i, this.frequencyY * j)/2)+0.5;
-                bufferWriter.setColor(i, j, new Color(color, color, color, 1.0));
+        new Range(0, image.getWidth(), 0, image.getHeight()).get().forEach( c -> {
+                int color =  ColorHelper.FloatChannelToInt((this.fastNoise.GetNoise(this.frequencyX * c.x(), this.frequencyY * c.y())/2)+0.5f);
+                buffer.setRGB(c.x(), c.y(), ColorHelper.ColorValueFromRGBA(color, color, color, 255));
             }
-        }
+        );
 
         return buffer;
     }

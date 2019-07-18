@@ -18,7 +18,8 @@
 
 package fauxpas.entities.blenders;
 
-import javafx.scene.paint.Color;
+
+import java.awt.Color;
 
 /**
  * Reflected, where the resulting color is the component wise product of incoming light (color1) and surface properties (color2), with opacity property of the surface
@@ -35,10 +36,10 @@ public class Reflection implements Blender {
     @Override
     public Color calc(Color color1, Color color2) {
         return new Color(
-            Math.min(1.0, color1.getRed() * color2.getRed()),
-            Math.min(1.0, color1.getGreen() * color2.getGreen()),
-            Math.min(1.0, color1.getBlue() * color2.getBlue()),
-            color2.getOpacity()
+            Math.min(255, color1.getRed() * color2.getRed()),
+            Math.min(255, color1.getGreen() * color2.getGreen()),
+            Math.min(255, color1.getBlue() * color2.getBlue()),
+            color2.getAlpha()
         );
     }
 }

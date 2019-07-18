@@ -18,11 +18,11 @@
 
 package fauxpas.filters;
 
+import fauxpas.entities.ColorHelper;
+import fauxpas.entities.ImageHelper;
 import fauxpas.entities.Sample;
-import javafx.scene.image.Image;
-import javafx.scene.image.PixelWriter;
-import javafx.scene.image.WritableImage;
-import javafx.scene.paint.Color;
+
+import java.awt.image.BufferedImage;
 
 /**
  * A utility filter for manipulating the contrast in an image.
@@ -44,19 +44,18 @@ public class RedistributionFilter implements Filter {
     }
 
     @Override
-    public Image apply(Image image) {
+    public BufferedImage apply(BufferedImage image) {
 
-        WritableImage buffer = new WritableImage((int)image.getWidth(), (int)image.getHeight());
-        PixelWriter bufferWriter = buffer.getPixelWriter();
+        BufferedImage buffer = ImageHelper.AllocateARGBBuffer(image.getWidth(), image.getHeight());
 
-        new Sample().get(image).forEach( p -> {
-            bufferWriter.setColor(p.x(), p.y(), new Color(
-                Math.min(1.0, Math.pow( 255*p.getRed(), this.pow )/255),
-                Math.min(1.0, Math.pow( 255*p.getGreen(), this.pow )/255),
-                Math.min(1.0, Math.pow( 255*p.getBlue(), this.pow )/255),
+        new Sample().get(image).forEach(p -> buffer.setRGB(p.x(), p.y(),
+            ColorHelper.ColorValueFromRGBA(
+                Math.min(255, (int) Math.pow( p.getRed(), this.pow )),
+                Math.min(255, (int) Math.pow( p.getGreen(), this.pow )),
+                Math.min(255, (int) Math.pow( p.getBlue(), this.pow )),
                 p.getOpacity()
-            ));
-        });
+            )
+        ));
 
         return buffer;
     }

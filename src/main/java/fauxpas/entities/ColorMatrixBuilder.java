@@ -16,18 +16,17 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package fauxpas.filters;
+package fauxpas.entities;
 
-import javafx.scene.image.Image;
-import javafx.scene.image.PixelReader;
-import javafx.scene.paint.Color;
 import org.jblas.DoubleMatrix;
+import java.awt.Color;
+import java.awt.image.BufferedImage;
 
 public class ColorMatrixBuilder {
 
-    public static DoubleMatrix getNeighborColorMatrix(Image target, ColorReader colorReader, int kernelWidth, int imageX, int imageY ) {
+    public static DoubleMatrix getNeighborColorMatrix(BufferedImage target, ColorReader colorReader, int kernelWidth, int imageX, int imageY ) {
         DoubleMatrix colors = new DoubleMatrix(kernelWidth, kernelWidth);
-        PixelReader targetReader = target.getPixelReader();
+
         int midPoint = kernelWidth/2;
 
         for (int kernelY = 0; kernelY < kernelWidth; ++kernelY ) {
@@ -36,20 +35,25 @@ public class ColorMatrixBuilder {
                 int i = kernelX - midPoint;
                 int j = kernelY - midPoint;
 
-                if ( ((imageX+i > 0) && (imageX+i < target.getWidth())) && ((imageY+j > 0) && (imageY+j < target.getHeight())) ) {
-                    colors.put(kernelY, kernelX, colorReader.getColorProperty(targetReader.getColor(imageX+i, imageY+j)) );
+                if ( ((imageX+i > 0) && (imageX+i < target.getWidth())) &&
+                    ((imageY+j > 0) && (imageY+j < target.getHeight())) ) {
+
+                    colors.put(kernelY, kernelX, colorReader.getColorProperty(
+                        ColorHelper.ColorFromRGBValue(target.getRGB(imageX+i, imageY+j))
+                    ));
                 }
                 else {
-                    colors.put(kernelY, kernelX, colorReader.getColorProperty(targetReader.getColor(imageX, imageY)));
+                    colors.put(kernelY, kernelX, colorReader.getColorProperty(
+                        ColorHelper.ColorFromRGBValue(target.getRGB(imageX, imageY))
+                    ));
                 }
             }
         }
         return colors;
     }
 
-    public static DoubleMatrix getNeighborColorColumnVector(Image target, ColorReader colorReader, int vectorHeight, int imageX, int imageY ) {
+    public static DoubleMatrix getNeighborColorColumnVector(BufferedImage target, ColorReader colorReader, int vectorHeight, int imageX, int imageY ) {
         DoubleMatrix colors = new DoubleMatrix(vectorHeight, 1);
-        PixelReader targetReader = target.getPixelReader();
         int midPoint = vectorHeight/2;
 
 
@@ -58,10 +62,14 @@ public class ColorMatrixBuilder {
             int i = y - midPoint;
 
             if ((imageY+i > 0) && (imageY+i < target.getHeight())) {
-                colors.put(y, 0, colorReader.getColorProperty(targetReader.getColor(imageX, imageY+i)) );
+                colors.put(y, 0, colorReader.getColorProperty(
+                    ColorHelper.ColorFromRGBValue(target.getRGB(imageX,imageY+i))
+                ));
             }
             else {
-                colors.put(y, 0, colorReader.getColorProperty(targetReader.getColor(imageX, imageY)));
+                colors.put(y, 0, colorReader.getColorProperty(
+                    ColorHelper.ColorFromRGBValue(target.getRGB(imageX, imageY))
+                ));
             }
         }
 
@@ -81,6 +89,14 @@ public class ColorMatrixBuilder {
         vector.put(0,0, color.getRed() );
         vector.put(0, 1, color.getGreen() );
         vector.put( 0, 2, color.getBlue() );
+        return vector;
+    }
+
+    public static DoubleMatrix getColorColumnVector(double redBalance, double greenBalance, double blueBalance) {
+        DoubleMatrix vector = new DoubleMatrix(1, 3);
+        vector.put(0,0, redBalance );
+        vector.put(0, 1, greenBalance );
+        vector.put( 0, 2, blueBalance );
         return vector;
     }
 }

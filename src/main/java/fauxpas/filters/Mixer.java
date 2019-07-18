@@ -18,10 +18,11 @@
 
 package fauxpas.filters;
 
-import javafx.scene.image.Image;
+
+import java.awt.image.BufferedImage;
 
 public interface Mixer {
 
-    Image apply(Image f, Image s);
+    BufferedImage apply(BufferedImage f, BufferedImage s);
 
 }

@@ -18,32 +18,32 @@
 
 package fauxpas.filters;
 
+import fauxpas.entities.ColorHelper;
+import fauxpas.entities.ImageHelper;
 import fauxpas.entities.Sample;
-import javafx.scene.image.Image;
-import javafx.scene.image.PixelWriter;
-import javafx.scene.image.WritableImage;
-import javafx.scene.paint.Color;
+
+import java.awt.image.BufferedImage;
+
 
 public class TransparencyFilter implements Filter {
 
-    private double alpha;
+    private int alpha;
 
     public TransparencyFilter() {
-        this(0.5f);
+        this(127);
     }
 
-    public TransparencyFilter(float alpha) {
-        this.alpha = Math.min(alpha, 1.0);
+    public TransparencyFilter(int alpha) {
+        this.alpha = Math.max(0, Math.min(alpha, 255));
     }
 
     @Override
-    public Image apply(Image image) {
+    public BufferedImage apply(BufferedImage image) {
 
-        WritableImage buffer = new WritableImage((int)image.getWidth(), (int)image.getHeight());
-        PixelWriter bufferWriter = buffer.getPixelWriter();
+        BufferedImage buffer = ImageHelper.AllocateARGBBuffer(image.getWidth(), image.getHeight());
 
         new Sample().get(image).forEach(p -> {
-            bufferWriter.setColor(p.x(), p.y(), new Color(p.getRed(), p.getGreen(), p.getGreen(), this.alpha));
+            buffer.setRGB(p.x(), p.y(), ColorHelper.ColorValueFromRGBA(p.getRed(), p.getGreen(), p.getGreen(), this.alpha));
         });
 
         return buffer;

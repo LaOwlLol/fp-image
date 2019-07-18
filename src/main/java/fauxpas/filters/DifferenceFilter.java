@@ -18,12 +18,14 @@
 
 package fauxpas.filters;
 
+import fauxpas.entities.ColorHelper;
+import fauxpas.entities.ColorMatrixBuilder;
+import fauxpas.entities.ImageHelper;
 import fauxpas.entities.Sample;
-import javafx.scene.image.Image;
-import javafx.scene.image.PixelReader;
-import javafx.scene.image.PixelWriter;
-import javafx.scene.image.WritableImage;
-import javafx.scene.paint.Color;
+
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+
 
 /**
  * A filter for producing an image from the difference between two images.
@@ -76,29 +78,36 @@ public class DifferenceFilter implements Mixer {
     }
 
     @Override
-    public Image apply(Image f, Image s) {
-        WritableImage buffer = new WritableImage((int)f.getWidth(), (int)f.getHeight());
-        PixelWriter bufferWriter = buffer.getPixelWriter();
-        PixelReader sr = s.getPixelReader();
+    public BufferedImage apply(BufferedImage f, BufferedImage s) {
+        BufferedImage buffer = ImageHelper.AllocateARGBBuffer(f.getWidth(), f.getHeight());
+
         this.appliedToEqual = true;
 
         new Sample().get(f).filter( p ->  p.x() < s.getWidth() && p.y() < s.getHeight() ).forEach(p -> {
             double delta;
             if (!manhattan) {
-                delta = ColorMatrixBuilder.getColorColumnVector(p.getColor())
-                    .subi(ColorMatrixBuilder.getColorColumnVector(sr.getColor(p.x(), p.y())))
+                delta = ColorMatrixBuilder.getColorColumnVector( p.getColor() )
+                    .subi(
+                        ColorMatrixBuilder.getColorColumnVector(
+                            ColorHelper.ColorFromRGBValue(s.getRGB(p.x(), p.y()))
+                        )
+                    )
                     .norm2();
             }
             else {
-                delta = ColorMatrixBuilder.getColorColumnVector(p.getColor())
-                    .subi(ColorMatrixBuilder.getColorColumnVector(sr.getColor(p.x(), p.y())))
+                delta = ColorMatrixBuilder.getColorColumnVector( p.getColor() )
+                    .subi(
+                        ColorMatrixBuilder.getColorColumnVector(
+                            ColorHelper.ColorFromRGBValue( s.getRGB(p.x(), p.y()) )
+                        )
+                    )
                     .norm1();
             }
 
             if ( delta < threshold) {
-                bufferWriter.setColor(p.x(), p.y(), equal);
+                buffer.setRGB(p.x(), p.y(), equal.getRGB());
             } else {
-                bufferWriter.setColor(p.x(), p.y(), diff);
+                buffer.setRGB(p.x(), p.y(), diff.getRGB());
                 this.appliedToEqual = false;
             }
         });

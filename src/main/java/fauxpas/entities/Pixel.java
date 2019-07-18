@@ -18,8 +18,8 @@
 
 package fauxpas.entities;
 
-import fauxpas.filters.ColorReader;
-import javafx.scene.paint.Color;
+
+import java.awt.Color;
 
 /**
  * A container for color, coordinate, and other properties of a single dot of an image.
@@ -28,6 +28,16 @@ public class Pixel {
 
     private Color color;
     private Coordinate coordinate;
+
+    /**
+     * Construct a pixel from a coordinate and color
+     * @param coordinate location of pixel
+     * @param color pixel display values
+     */
+    public Pixel(Coordinate coordinate, int color) {
+        this(coordinate, new Color( color ));
+    }
+
 
     /**
      * Construct a pixel from a coordinate and color
@@ -46,21 +56,20 @@ public class Pixel {
         return this.coordinate.y();
     }
 
-
-    public double getRed() {
+    public int getRed() {
         return color.getRed();
     }
 
-    public double getGreen() {
+    public int getGreen() {
         return color.getGreen();
     }
 
-    public double getBlue() {
+    public int getBlue() {
         return color.getBlue();
     }
 
-    public double getOpacity() {
-        return color.getOpacity();
+    public int getOpacity() {
+        return color.getAlpha();
     }
 
     public Color getColor() { return color; }

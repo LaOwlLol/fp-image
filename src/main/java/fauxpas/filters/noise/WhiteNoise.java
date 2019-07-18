@@ -18,12 +18,12 @@
 
 package fauxpas.filters.noise;
 
+import fauxpas.entities.ColorHelper;
+import fauxpas.entities.ImageHelper;
+import fauxpas.entities.Range;
 import fauxpas.filters.Filter;
-import javafx.scene.image.Image;
-import javafx.scene.image.PixelWriter;
-import javafx.scene.image.WritableImage;
-import javafx.scene.paint.Color;
 
+import java.awt.image.BufferedImage;
 import java.util.Random;
 
 public class WhiteNoise implements Filter {
@@ -35,17 +35,16 @@ public class WhiteNoise implements Filter {
     }
 
     @Override
-    public Image apply(Image image) {
+    public BufferedImage apply(BufferedImage image) {
 
-        WritableImage buffer = new WritableImage((int)image.getWidth(), (int)image.getHeight());
-        PixelWriter bufferWriter = buffer.getPixelWriter();
 
-        for (int j = 0; j < image.getHeight(); ++j) {
-            for (int i = 0; i < image.getWidth(); ++i) {
-                double color = (Math.sin(this.random.nextGaussian())/2) +0.5;
-                bufferWriter.setColor(i, j, new Color(color, color, color, 1.0));
+        BufferedImage buffer = ImageHelper.AllocateARGBBuffer(image.getWidth(), image.getHeight());
+
+        new Range(0, image.getWidth(), 0, image.getHeight()).get().forEach(c -> {
+                int color =  ColorHelper.FloatChannelToInt((float)(Math.sin(this.random.nextGaussian())/2) +0.5f);
+                buffer.setRGB(c.x(), c.y(), ColorHelper.ColorValueFromRGBA(color, color, color, 255));
             }
-        }
+        );
 
         return buffer;
     }

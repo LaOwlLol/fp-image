@@ -18,13 +18,13 @@
 
 package fauxpas.filters;
 
+import fauxpas.entities.ColorHelper;
+import fauxpas.entities.ColorMatrixBuilder;
+import fauxpas.entities.ImageHelper;
 import fauxpas.entities.Range;
-import javafx.scene.image.Image;
-import javafx.scene.image.PixelReader;
-import javafx.scene.image.PixelWriter;
-import javafx.scene.image.WritableImage;
-import javafx.scene.paint.Color;
 import org.jblas.DoubleMatrix;
+
+import java.awt.image.BufferedImage;
 
 /**
  * An canny edge filter which implements Non-maximum suppression, Double threshold, and Edge tracking by hysteresis described at https://en.wikipedia.org/wiki/Canny_edge_detector
@@ -94,64 +94,62 @@ public class CannyFilter implements Filter{
     }
 
     @Override
-    public Image apply(Image target) {
+    public BufferedImage apply(BufferedImage image) {
 
-        WritableImage buffer = new WritableImage((int) target.getWidth(), (int) target.getHeight());
-        PixelWriter bufferWriter = buffer.getPixelWriter();
-        PixelReader targetReader = target.getPixelReader();
+        BufferedImage buffer = ImageHelper.AllocateARGBBuffer(image.getWidth(), image.getHeight());
 
-        new Range(0, (int) target.getWidth(), 0, (int) target.getHeight()).get().forEach( c -> {
-            //double orientation;
-            //double kernelSum;
-            //double gradient;
+        new Range(0, image.getWidth(), 0, image.getHeight()).get().forEach( c -> {
 
-            if (targetReader.getColor(c.x(), c.y()).getBrightness() != 0.0) {
+            int color = image.getRGB(c.x(), c.y());
 
-                double orientation = targetReader.getColor(c.x(), c.y()).getHue();
-                double gradient = targetReader.getColor(c.x(), c.y()).getBrightness();
+            if (ColorHelper.Brightness(color) != 0.0) {
+
+                float orientation = ColorHelper.Hue( color );
+                float gradient =  ColorHelper.Brightness( color ) ;
                 double kernelSum = 0.0;
+                int gray = ColorHelper.FloatChannelToInt(gradient);
 
                 //NOTE: for the sake of speed we are ignoring double comparison errors.
 
                 //horizontal line
                 if ( ((orientation > 337.5 && orientation <= 360 ) || ( orientation > 0 && orientation <= 22.5 )) ||
                         (orientation > 157.5 && orientation <= 202.5 )) {
-                    kernelSum = horzKernel.mul(ColorMatrixBuilder.getNeighborColorMatrix(target, Color::getBrightness, WIDTH, c.x(), c.y())).sum();
+                    kernelSum = horzKernel.mul(ColorMatrixBuilder.getNeighborColorMatrix(image, ColorHelper::Brightness, WIDTH, c.x(), c.y())).sum();
                 }
                 //vertical line
                 else if ( (orientation > 67.5 && orientation >= 112.5) || ( orientation > 247.5 && orientation <= 292.5 ) ) {
-                    kernelSum  = vertKernel.mul(ColorMatrixBuilder.getNeighborColorMatrix(target, Color::getBrightness, WIDTH, c.x(), c.y())).sum();
+                    kernelSum  = vertKernel.mul(ColorMatrixBuilder.getNeighborColorMatrix(image, ColorHelper::Brightness, WIDTH, c.x(), c.y())).sum();
                 }
                 //positive slope
                 else if ( (orientation > 22.5 && orientation >= 67.5) || ( orientation > 202.5 && orientation <= 247.5) ) {
-                    kernelSum  = posSlopeKernel.mul(ColorMatrixBuilder.getNeighborColorMatrix(target, Color::getBrightness, WIDTH, c.x(), c.y())).sum();
+                    kernelSum  = posSlopeKernel.mul(ColorMatrixBuilder.getNeighborColorMatrix(image, ColorHelper::Brightness, WIDTH, c.x(), c.y())).sum();
                 }
                 //negative slope
                 else if ( (orientation > 112.5 && orientation >= 157.5) || ( orientation > 292.5 && orientation <= 337.5) ) {
-                    kernelSum  = negSlopeKernel.mul(ColorMatrixBuilder.getNeighborColorMatrix(target, Color::getBrightness, WIDTH, c.x(), c.y())).sum();
+                    kernelSum  = negSlopeKernel.mul(ColorMatrixBuilder.getNeighborColorMatrix(image, ColorHelper::Brightness, WIDTH, c.x(), c.y())).sum();
                 }
 
                 if (gradient > kernelSum) {
-                    bufferWriter.setColor(c.x(), c.y(), Color.gray(gradient, targetReader.getColor(c.x(), c.y()).getOpacity()));
+                    buffer.setRGB(c.x(), c.y(), ColorHelper.ColorValueFromRGBA( gray, gray, gray, ColorHelper.Alpha(color) ));
                 }
                 else if (gradient > this.lowerThreshHold) {
                     if (gradient > this.upperThreshHold) {
-                        bufferWriter.setColor(c.x(), c.y(), Color.gray(gradient, targetReader.getColor(c.x(), c.y()).getOpacity()));
+                        buffer.setRGB(c.x(), c.y(), ColorHelper.ColorValueFromRGBA( gray, gray, gray, ColorHelper.Alpha(color) ));
                     }
-                    else if ( checkSurroundingPixels(target, targetReader, c.x(), c.y()) ) {
-                        bufferWriter.setColor(c.x(), c.y(), Color.gray(gradient, targetReader.getColor(c.x(), c.y()).getOpacity()));
+                    else if ( checkSurroundingPixels(image, c.x(), c.y()) ) {
+                        buffer.setRGB(c.x(), c.y(), ColorHelper.ColorValueFromRGBA( gray, gray, gray, ColorHelper.Alpha(color) ));
                     }
                     else {
-                        bufferWriter.setColor(c.x(), c.y(), Color.gray(0.0, targetReader.getColor(c.x(), c.y()).getOpacity()));
+                        buffer.setRGB(c.x(), c.y(), ColorHelper.ColorValueFromRGBA( 0, 0, 0, ColorHelper.Alpha(color) ));
                     }
                 }
                 else {
-                    bufferWriter.setColor(c.x(), c.y(), Color.gray(0.0, targetReader.getColor(c.x(), c.y()).getOpacity()));
+                    buffer.setRGB(c.x(), c.y(), ColorHelper.ColorValueFromRGBA( 0, 0, 0, ColorHelper.Alpha(color) ));
                 }
 
             }
             else {
-                bufferWriter.setColor(c.x(), c.y(), Color.gray(0.0, targetReader.getColor(c.x(), c.y()).getOpacity()));
+                buffer.setRGB(c.x(), c.y(), ColorHelper.ColorValueFromRGBA( 0, 0, 0, ColorHelper.Alpha(color)) );
             }
 
         });
@@ -159,47 +157,31 @@ public class CannyFilter implements Filter{
         return buffer;
     }
 
-    private boolean checkSurroundingPixels(Image target, PixelReader targetReader, int imageX, int imageY) {
+    private boolean checkSurroundingPixels(BufferedImage target, int imageX, int imageY) {
 
         if (imageX - 1 > 0 && imageY -1 > 0) {
-            if (targetReader.getColor(imageX-1, imageY-1).getBrightness() > this.lowerThreshHold ) {
-                return true;
-            }
+            return ColorHelper.Brightness(target.getRGB(imageX, imageY)) > this.lowerThreshHold;
         }
         else if (imageY - 1 > 0) {
-            if (targetReader.getColor(imageX, imageY-1).getBrightness() > this.lowerThreshHold ) {
-                return true;
-            }
+            return ColorHelper.Brightness(target.getRGB(imageX, imageY)) > this.lowerThreshHold;
         }
         else if (imageX + 1 < target.getWidth() && imageY -1 > 0) {
-            if (targetReader.getColor(imageX+1, imageY-1).getBrightness() > this.lowerThreshHold ) {
-                return true;
-            }
+            return ColorHelper.Brightness(target.getRGB(imageX, imageY)) > this.lowerThreshHold;
         }
         else if (imageX + 1 < target.getWidth()) {
-            if (targetReader.getColor(imageX+1, imageY).getBrightness() > this.lowerThreshHold ) {
-                return true;
-            }
+            return ColorHelper.Brightness(target.getRGB(imageX, imageY)) > this.lowerThreshHold;
         }
         else if (imageX + 1 < target.getWidth() && imageY + 1 < target.getHeight()) {
-            if (targetReader.getColor(imageX-1, imageY-1).getBrightness() > this.lowerThreshHold ) {
-                return true;
-            }
+            return ColorHelper.Brightness(target.getRGB(imageX, imageY)) > this.lowerThreshHold;
         }
         else if (imageY + 1 < target.getHeight()) {
-            if (targetReader.getColor(imageX, imageY+1).getBrightness() > this.lowerThreshHold ) {
-                return true;
-            }
+            return ColorHelper.Brightness(target.getRGB(imageX, imageY)) > this.lowerThreshHold;
         }
         else if (imageX - 1 > 0 && imageY + 1 < target.getHeight()) {
-            if (targetReader.getColor(imageX-1, imageY+1).getBrightness() > this.lowerThreshHold ) {
-                return true;
-            }
+            return ColorHelper.Brightness(target.getRGB(imageX, imageY)) > this.lowerThreshHold;
         }
         else if (imageX - 1 > 0 ) {
-            if (targetReader.getColor(imageX-1, imageY).getBrightness() > this.lowerThreshHold ) {
-                return true;
-            }
+            return ColorHelper.Brightness(target.getRGB(imageX, imageY)) > this.lowerThreshHold;
         }
 
         return false;

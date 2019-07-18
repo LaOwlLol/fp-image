@@ -18,13 +18,16 @@
 
 package fauxpas.filters;
 
+import fauxpas.entities.ColorHelper;
+import fauxpas.entities.ColorMatrixBuilder;
+import fauxpas.entities.ImageHelper;
 import fauxpas.entities.Range;
-import javafx.scene.image.Image;
-import javafx.scene.image.PixelReader;
-import javafx.scene.image.PixelWriter;
-import javafx.scene.image.WritableImage;
-import javafx.scene.paint.Color;
+
+
+
 import org.jblas.DoubleMatrix;
+
+import java.awt.image.BufferedImage;
 
 /**
  * A utility for reducing noise in images, by averaging each pixel in an image with it's neighbors.
@@ -81,19 +84,18 @@ public class GaussianBlur implements Filter {
     }
 
     @Override
-    public Image apply(Image target) {
+    public BufferedImage apply(BufferedImage image) {
 
-        PixelReader targetReader = target.getPixelReader();
-        WritableImage buffer = new WritableImage((int) target.getWidth(), (int) target.getHeight());
-        PixelWriter bufferWriter = buffer.getPixelWriter();
+        BufferedImage buffer = ImageHelper.AllocateARGBBuffer(image.getWidth(), image.getHeight());
 
-        new Range(0, (int) target.getWidth(), 0, (int) target.getHeight() ).get().forEach( c -> {
-            bufferWriter.setColor(c.x(), c.y(), new Color(
-                    ColorMatrixBuilder.getNeighborColorMatrix(target, Color::getRed, this.width, c.x(), c.y()).mul(this.kernel).sum()/this.kernelValue,
-                    ColorMatrixBuilder.getNeighborColorMatrix(target, Color::getGreen, this.width, c.x(), c.y()).mul(this.kernel).sum()/this.kernelValue,
-                    ColorMatrixBuilder.getNeighborColorMatrix(target, Color::getBlue, this.width, c.x(), c.y()).mul(this.kernel).sum()/this.kernelValue,
-                    targetReader.getColor(c.x(), c.y()).getOpacity() ) );
-        }) ;
+        new Range(0, image.getWidth(), 0, image.getHeight() ).get().forEach( c ->
+            buffer.setRGB(c.x(), c.y(), ColorHelper.ColorValueFromRGBA(
+                (int) (ColorMatrixBuilder.getNeighborColorMatrix(image, (color) -> color.getRed(), this.width, c.x(), c.y()).mul(this.kernel).sum()/this.kernelValue),
+                (int) (ColorMatrixBuilder.getNeighborColorMatrix(image, (color) -> color.getGreen(), this.width, c.x(), c.y()).mul(this.kernel).sum()/this.kernelValue),
+                (int) (ColorMatrixBuilder.getNeighborColorMatrix(image, (color) -> color.getBlue(), this.width, c.x(), c.y()).mul(this.kernel).sum()/this.kernelValue),
+                ColorHelper.ColorFromRGBValue(image.getRGB(c.x(), c.y())).getAlpha()
+            )
+        )) ;
 
         return buffer;
     }

@@ -18,7 +18,8 @@
 
 package fauxpas.entities.blenders;
 
-import javafx.scene.paint.Color;
+
+import java.awt.Color;
 
 /**
  * Composite colors with simple interpolation calculation.
@@ -47,6 +48,11 @@ public class SimpleComposite implements Blender{
      */
     @Override
     public Color calc(Color color1, Color color2) {
-        return color1.interpolate(color2, this.bias);
+        return new Color (
+            Math.min (255, (int) ((color2.getRed() - color1.getRed())*this.bias) + color1.getRed()),
+            Math.min (255, (int) ((color2.getGreen() - color1.getGreen())*this.bias) + color1.getGreen()),
+            Math.min (255, (int) ((color2.getBlue() - color1.getBlue())*this.bias) + color1.getBlue()),
+            Math.min (255, (int) ((color2.getAlpha() - color1.getAlpha())*this.bias) + color1.getAlpha())
+        );
     }
 }

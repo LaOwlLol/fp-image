@@ -16,10 +16,12 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package fauxpas.filters;
+package fauxpas.entities;
 
-import javafx.scene.paint.Color;
+import java.awt.image.BufferedImage;
 
-public interface ColorReader {
-    double getColorProperty(Color color);
+public class ImageHelper {
+    public static BufferedImage AllocateARGBBuffer(int width, int height) {
+        return new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    }
 }

@@ -18,7 +18,6 @@
 
 package fauxpas.entities;
 
-import java.util.ArrayList;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
