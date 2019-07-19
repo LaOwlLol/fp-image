@@ -69,9 +69,7 @@ public class ChromaKeyFilter implements Filter {
         BufferedImage buffer = ImageHelper.AllocateARGBBuffer(image.getWidth(), image.getHeight());
 
         new Sample().get(image).forEach( p -> {
-            float delta = Math.min(1.0f, (float) (Math.pow(key_color.getRed() - p.getRed(), 2) +
-                    Math.pow(key_color.getGreen() - p.getGreen(), 2) +
-                    Math.pow(key_color.getBlue() - p.getBlue(), 2) ));
+            float delta = ColorHelper.EuclidianDistance(key_color, p.getColor());
 
             if (delta < threshold) {
                 if ( source_image != null ) {

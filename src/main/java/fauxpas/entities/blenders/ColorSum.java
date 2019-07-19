@@ -45,7 +45,7 @@ public class ColorSum implements Blender {
             Math.min(255, color1.getRed() + color2.getRed()),
             Math.min(255, color1.getGreen() +  color2.getGreen()),
             Math.min(255, color1.getBlue() + color2.getBlue()),
-            Math.min(255, color1.getAlpha()) + color2.getAlpha()
+            Math.min(255, color1.getAlpha() + color2.getAlpha())
         );
     }
 }

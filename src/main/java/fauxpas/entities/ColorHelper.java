@@ -70,6 +70,12 @@ public class ColorHelper {
         return ColorFromRGBValue(color).getAlpha();
     }
 
+    public static float EuclidianDistance(Color a, Color b) {
+        return (float) ( Math.pow( IntChannelToFloat( a.getRed() - b.getRed() ), 2) +
+            Math.pow( IntChannelToFloat( a.getGreen() - b.getGreen() ), 2) +
+            Math.pow( IntChannelToFloat( a.getBlue() - b.getBlue() ), 2) );
+    }
+
     public static float IntChannelToFloat(int i) {
         return i/255.0f;
     }
