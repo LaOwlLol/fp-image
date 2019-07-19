@@ -38,25 +38,25 @@ public class ChromaKeyFilter implements Filter {
     private Color key_color;
     private Color source_color;
     private BufferedImage source_image;
-    private double threshold;
+    private float threshold;
 
     public ChromaKeyFilter() {
-        this(Color.GREEN, null, null, 0.1);
+        this(Color.GREEN, null, null, 0.1f);
     }
 
-    public ChromaKeyFilter(Color key_color, double threshold) {
+    public ChromaKeyFilter(Color key_color, float threshold) {
         this(key_color, null, null, threshold);
     }
 
-    public ChromaKeyFilter(Color key_color, Color source_color, double threshold) {
+    public ChromaKeyFilter(Color key_color, Color source_color, float threshold) {
         this(key_color, source_color, null, threshold);
     }
 
-    public ChromaKeyFilter(Color key_color, BufferedImage source_image, double threshold) {
+    public ChromaKeyFilter(Color key_color, BufferedImage source_image, float threshold) {
         this(key_color, null, source_image, threshold);
     }
 
-    private ChromaKeyFilter(Color key_color, Color source_color, BufferedImage source_image, double threshold) {
+    private ChromaKeyFilter(Color key_color, Color source_color, BufferedImage source_image, float threshold) {
         this.key_color = key_color;
         this.source_color = source_color;
         this.source_image = ((source_image != null) ? source_image : null);
@@ -69,7 +69,7 @@ public class ChromaKeyFilter implements Filter {
         BufferedImage buffer = ImageHelper.AllocateARGBBuffer(image.getWidth(), image.getHeight());
 
         new Sample().get(image).forEach( p -> {
-            double delta = Math.min(1.0, (Math.pow(key_color.getRed() - p.getRed(), 2) +
+            float delta = Math.min(1.0f, (float) (Math.pow(key_color.getRed() - p.getRed(), 2) +
                     Math.pow(key_color.getGreen() - p.getGreen(), 2) +
                     Math.pow(key_color.getBlue() - p.getBlue(), 2) ));
 

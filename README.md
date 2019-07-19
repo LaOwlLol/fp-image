@@ -65,7 +65,7 @@ myFilteredImage.applyFilter(new SobelFilter(0.02));
 
 #### Canny Edges: 
 
-CannyFilter works on the output of a SobelFilter (it does not internally call sobel at this time).  CannyFilter constructor can take an upper and low threshold values for double threshold and edge tracking by hysteresis (see wikipedia).  If not thresholds are provided the default value are 0.0001 and 0.15.
+CannyFilter works on the output of a SobelFilter (it does not internally call sobel at this time).  CannyFilter constructor can take an upper and low threshold values for float threshold and edge tracking by hysteresis (see wikipedia).  If not thresholds are provided the default value are 0.0001 and 0.15.
 
 ```java
 myFilteredImage.applyFilter(new GaussianBlur(3,3));

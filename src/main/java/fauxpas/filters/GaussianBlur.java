@@ -23,9 +23,7 @@ import fauxpas.entities.ColorMatrixBuilder;
 import fauxpas.entities.ImageHelper;
 import fauxpas.entities.Range;
 
-
-
-import org.jblas.DoubleMatrix;
+import org.jblas.FloatMatrix;
 
 import java.awt.image.BufferedImage;
 
@@ -37,14 +35,14 @@ public class GaussianBlur implements Filter {
     private static final int RED = 0;
     private static final int GREEN = 1;
     private static final int BLUE = 2;
-    private double kernelValue;
-    private double standardDeviation;
-    private DoubleMatrix kernel;
+    private float kernelValue;
+    private float standardDeviation;
+    private FloatMatrix kernel;
     private int width;
     private final int mid;
 
     public GaussianBlur() {
-        this(3, 1.0);
+        this(3, 1.0f);
     }
 
     /**
@@ -52,7 +50,7 @@ public class GaussianBlur implements Filter {
      * @param width dimension of the convolution kernal.  Should be an odd number. Larger kernel means slower computation.
      * @param standardDeviation values used to intialize the convolution color. Higher values should mean more smoothing, no computation cost.
      */
-    public GaussianBlur(int width, double standardDeviation) {
+    public GaussianBlur(int width, float standardDeviation) {
 
         //todo all good if no true center to kernel?
         if (width % 2 == 0) {
@@ -62,22 +60,22 @@ public class GaussianBlur implements Filter {
 
         this.standardDeviation = standardDeviation;
         this.width = width;
-        this.kernel = new DoubleMatrix(this.width, this.width);
+        this.kernel = new FloatMatrix(this.width, this.width);
 
         this.mid = width/2;
 
         //pre calculate parts of gaussian equation that don't contain x,y
-        double expDenom = Math.PI * Math.pow(this.standardDeviation,2);
-        double outerDenom = 2.0 * expDenom;
+        float expDenom = (float) (Math.PI * Math.pow(this.standardDeviation,2));
+        float outerDenom = 2.0f * expDenom;
 
         //initialize kernel
-        this.kernelValue = 0.0;
+        this.kernelValue = 0.0f;
 
         new Range(0, 3, 0, 3).get().forEach( c -> {
             int i = c.x() - mid;
             int j = c.y() - mid;
-            double expNumer = Math.pow(i, 2) + Math.pow(j, 2);
-            double kvalue = (1.0/outerDenom) * Math.exp(expNumer/expDenom);
+            float expNumer = (float) (Math.pow(i, 2) + Math.pow(j, 2));
+            float kvalue = (1.0f/outerDenom) * (float) Math.exp(expNumer/expDenom);
             this.kernel.put(c.y(), c.x(),  kvalue);
             this.kernelValue += kvalue;
         } );

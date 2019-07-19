@@ -36,10 +36,10 @@ public class CompositeFilter implements Mixer{
     SimpleComposite blender;
 
     public CompositeFilter() {
-        this(0.5);
+        this(0.5f);
     }
 
-    public CompositeFilter(double bias) {
+    public CompositeFilter(float bias) {
          blender = new SimpleComposite(bias);
     }
 

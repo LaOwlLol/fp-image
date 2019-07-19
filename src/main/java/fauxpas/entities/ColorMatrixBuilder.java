@@ -18,14 +18,15 @@
 
 package fauxpas.entities;
 
-import org.jblas.DoubleMatrix;
+import org.jblas.FloatMatrix;
+
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 public class ColorMatrixBuilder {
 
-    public static DoubleMatrix getNeighborColorMatrix(BufferedImage target, ColorReader colorReader, int kernelWidth, int imageX, int imageY ) {
-        DoubleMatrix colors = new DoubleMatrix(kernelWidth, kernelWidth);
+    public static FloatMatrix getNeighborColorMatrix(BufferedImage target, ColorReader colorReader, int kernelWidth, int imageX, int imageY ) {
+        FloatMatrix colors = new FloatMatrix(kernelWidth, kernelWidth);
 
         int midPoint = kernelWidth/2;
 
@@ -52,8 +53,8 @@ public class ColorMatrixBuilder {
         return colors;
     }
 
-    public static DoubleMatrix getNeighborColorColumnVector(BufferedImage target, ColorReader colorReader, int vectorHeight, int imageX, int imageY ) {
-        DoubleMatrix colors = new DoubleMatrix(vectorHeight, 1);
+    public static FloatMatrix getNeighborColorColumnVector(BufferedImage target, ColorReader colorReader, int vectorHeight, int imageX, int imageY ) {
+        FloatMatrix colors = new FloatMatrix(vectorHeight, 1);
         int midPoint = vectorHeight/2;
 
 
@@ -76,24 +77,24 @@ public class ColorMatrixBuilder {
         return colors;
     }
 
-    public static DoubleMatrix getColorColumnVector(Color color) {
-        DoubleMatrix vector = new DoubleMatrix(3, 1);
+    public static FloatMatrix getColorColumnVector(Color color) {
+        FloatMatrix vector = new FloatMatrix(3, 1);
         vector.put(0,0, color.getRed() );
         vector.put(1, 0, color.getGreen() );
         vector.put( 2, 0, color.getBlue() );
         return vector;
     }
 
-    public static DoubleMatrix getColorRowVector(Color color) {
-        DoubleMatrix vector = new DoubleMatrix(1, 3);
+    public static FloatMatrix getColorRowVector(Color color) {
+        FloatMatrix vector = new FloatMatrix(1, 3);
         vector.put(0,0, color.getRed() );
         vector.put(0, 1, color.getGreen() );
         vector.put( 0, 2, color.getBlue() );
         return vector;
     }
 
-    public static DoubleMatrix getColorColumnVector(double redBalance, double greenBalance, double blueBalance) {
-        DoubleMatrix vector = new DoubleMatrix(1, 3);
+    public static FloatMatrix getColorColumnVector(float redBalance, float greenBalance, float blueBalance) {
+        FloatMatrix vector = new FloatMatrix(1, 3);
         vector.put(0,0, redBalance );
         vector.put(0, 1, greenBalance );
         vector.put( 0, 2, blueBalance );

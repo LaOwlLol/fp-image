@@ -21,5 +21,5 @@ package fauxpas.entities;
 import java.awt.Color;
 
 public interface ColorReader {
-    double getColorProperty(Color color);
+    float getColorProperty(Color color);
 }

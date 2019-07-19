@@ -35,7 +35,7 @@ import java.awt.image.BufferedImage;
  * If the two source pixels are with in the threshold of each other, they are colored 'equal'.  Otherwise they are colored 'diff'
  */
 public class DifferenceFilter implements Mixer {
-    private final double threshold;
+    private final float threshold;
     private Color equal;
     private Color diff;
     private boolean manhattan;
@@ -46,7 +46,7 @@ public class DifferenceFilter implements Mixer {
      * Default Difference filter with green for similar pixels (within 0.05) and red for different pixels.
      */
     public DifferenceFilter() {
-        this(Color.GREEN, Color.RED, 0.05, false);
+        this(Color.GREEN, Color.RED, 0.05f, false);
     }
 
     /**
@@ -54,7 +54,7 @@ public class DifferenceFilter implements Mixer {
      * @param threshold  threshold for equality.
      * @param manhattan use manhattan distance (false is euclidean)
      */
-    public DifferenceFilter(double threshold, boolean manhattan) {
+    public DifferenceFilter(float threshold, boolean manhattan) {
         this(Color.GREEN, Color.RED, threshold, manhattan);
     }
 
@@ -65,7 +65,7 @@ public class DifferenceFilter implements Mixer {
      * @param threshold  threshold for equality.
      * @param manhattan use manhattan distance (false is euclidean)
      */
-    public DifferenceFilter(Color equal, Color diff, double threshold, boolean manhattan) {
+    public DifferenceFilter(Color equal, Color diff, float threshold, boolean manhattan) {
         this.equal = equal;
         this.diff = diff;
         this.threshold = threshold;
@@ -84,7 +84,7 @@ public class DifferenceFilter implements Mixer {
         this.appliedToEqual = true;
 
         new Sample().get(f).filter( p ->  p.x() < s.getWidth() && p.y() < s.getHeight() ).forEach(p -> {
-            double delta;
+            float delta;
             if (!manhattan) {
                 delta = ColorMatrixBuilder.getColorColumnVector( p.getColor() )
                     .subi(

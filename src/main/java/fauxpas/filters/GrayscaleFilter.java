@@ -32,12 +32,12 @@ import java.awt.image.BufferedImage;
  */
 public class GrayscaleFilter implements Filter {
 
-    private double redBalance;
-    private double greenBalance;
-    private double blueBalance;
+    private float redBalance;
+    private float greenBalance;
+    private float blueBalance;
 
     public GrayscaleFilter() {
-        this(0.3, 0.59, 0.11);
+        this(0.3f, 0.59f, 0.11f);
     }
 
     /**
@@ -46,7 +46,7 @@ public class GrayscaleFilter implements Filter {
      * @param greenBalance green bias
      * @param blueBalance blue bias
      */
-    public GrayscaleFilter(double redBalance, double greenBalance, double blueBalance) {
+    public GrayscaleFilter(float redBalance, float greenBalance, float blueBalance) {
         this.redBalance = redBalance;
         this.greenBalance = greenBalance;
         this.blueBalance = blueBalance;

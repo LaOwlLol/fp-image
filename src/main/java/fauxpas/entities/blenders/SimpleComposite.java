@@ -26,17 +26,17 @@ import java.awt.Color;
  */
 public class SimpleComposite implements Blender{
 
-    private double bias;
+    private float bias;
 
     /**
      * Construct a composite blender with default bias of 0.5
      */
     public SimpleComposite() {
-        this(0.5);
+        this(0.5f);
     }
 
 
-    public SimpleComposite(double bias) {
+    public SimpleComposite(float bias) {
         this.bias = bias;
     }
 
@@ -49,10 +49,10 @@ public class SimpleComposite implements Blender{
     @Override
     public Color calc(Color color1, Color color2) {
         return new Color (
-            Math.min (255, (int) ((color2.getRed() - color1.getRed())*this.bias) + color1.getRed()),
-            Math.min (255, (int) ((color2.getGreen() - color1.getGreen())*this.bias) + color1.getGreen()),
-            Math.min (255, (int) ((color2.getBlue() - color1.getBlue())*this.bias) + color1.getBlue()),
-            Math.min (255, (int) ((color2.getAlpha() - color1.getAlpha())*this.bias) + color1.getAlpha())
+            Math.max( Math.min (255, (int) ((color2.getRed() - color1.getRed())*this.bias) + color1.getRed()), 0),
+            Math.max( Math.min (255, (int) ((color2.getGreen() - color1.getGreen())*this.bias) + color1.getGreen()), 0),
+            Math.max( Math.min (255, (int) ((color2.getBlue() - color1.getBlue())*this.bias) + color1.getBlue()), 0),
+            Math.max( Math.min (255, (int) ((color2.getAlpha() - color1.getAlpha())*this.bias) + color1.getAlpha()), 0)
         );
     }
 }

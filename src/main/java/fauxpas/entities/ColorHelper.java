@@ -27,13 +27,13 @@ public class ColorHelper {
     }
     public static Color ColorFromRGBValue(int color){ return new Color(color); }
 
-    public static int Luminance(Color color, double redBalance, double greenBalance, double blueBalance) {
+    public static int Luminance(Color color, float redBalance, float greenBalance, float blueBalance) {
         return Math.min(255,(int) ColorMatrixBuilder.getColorColumnVector(color).dot(
             ColorMatrixBuilder.getColorColumnVector(redBalance, greenBalance, blueBalance) ) );
     }
 
     public static int Luminance(Color color) {
-        return Luminance(color, 0.3, 0.59, 0.11);
+        return Luminance(color, 0.3f, 0.59f, 0.11f);
     }
 
     public static float Brightness(Color color) {
@@ -68,6 +68,10 @@ public class ColorHelper {
 
     public static int Alpha(int color) {
         return ColorFromRGBValue(color).getAlpha();
+    }
+
+    public static float IntChannelToFloat(int i) {
+        return i/255.0f;
     }
 
     public static int FloatChannelToInt(float f) {

@@ -75,9 +75,9 @@ public class FastNoise {
         CalculateFractalBounding();
     }
 
-    // Returns a 0 float/double
+    // Returns as 0 float
     public static float GetDecimalType() {
-        return 0;
+        return 0.0f;
     }
 
     // Returns the seed used by this object

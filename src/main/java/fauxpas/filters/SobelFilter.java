@@ -23,7 +23,7 @@ import fauxpas.entities.ColorMatrixBuilder;
 import fauxpas.entities.ImageHelper;
 import fauxpas.entities.Range;
 
-import org.jblas.DoubleMatrix;
+import org.jblas.FloatMatrix;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -43,43 +43,43 @@ public class SobelFilter implements Filter {
 
     private final int WIDTH = 3;
 
-    private final double threshHold;
-    private final DoubleMatrix horzKernal;
-    private final DoubleMatrix vertKernal;
+    private final float threshHold;
+    private final FloatMatrix horzKernal;
+    private final FloatMatrix vertKernal;
 
     private final boolean preserveSaturation;
     private final boolean manhattan;
 
     public SobelFilter() {
-        this(0.2, false, false);
+        this(0.2f, false, false);
     }
 
-    public SobelFilter(double threshHold) {
+    public SobelFilter(float threshHold) {
         this(threshHold, false, false);
 
     }
 
-    public SobelFilter(double threshHold, boolean preserveSaturation) {
+    public SobelFilter(float threshHold, boolean preserveSaturation) {
         this(threshHold, preserveSaturation, false);
 
     }
     
-    public SobelFilter(double threshHold, boolean preserveSaturation, boolean manhattan) {
-        this.horzKernal = new DoubleMatrix(WIDTH, WIDTH);
-        this.horzKernal.put(0,0, -1.0);
-        this.horzKernal.put(0,1, -1);
-        this.horzKernal.put(0,2, -1.0);
-        this.horzKernal.put(2,0, 1.0);
-        this.horzKernal.put(2,1,1);
-        this.horzKernal.put(2,2,1.0);
+    public SobelFilter(float threshHold, boolean preserveSaturation, boolean manhattan) {
+        this.horzKernal = new FloatMatrix(WIDTH, WIDTH);
+        this.horzKernal.put(0,0, -1.0f);
+        this.horzKernal.put(0,1, -1.0f);
+        this.horzKernal.put(0,2, -1.0f);
+        this.horzKernal.put(2,0, 1.0f);
+        this.horzKernal.put(2,1,1.0f);
+        this.horzKernal.put(2,2,1.0f);
 
-        this.vertKernal = new DoubleMatrix(WIDTH,WIDTH);
-        this.vertKernal.put(0,0, -1.0);
-        this.vertKernal.put(1,0,-1);
-        this.vertKernal.put(2,0, -1.0);
-        this.vertKernal.put(0,2, 1.0);
-        this.vertKernal.put(1,2,1);
-        this.vertKernal.put(2,2,1.0);
+        this.vertKernal = new FloatMatrix(WIDTH,WIDTH);
+        this.vertKernal.put(0,0, -1.0f);
+        this.vertKernal.put(1,0,-1.0f);
+        this.vertKernal.put(2,0, -1.0f);
+        this.vertKernal.put(0,2, 1.0f);
+        this.vertKernal.put(1,2,1.0f);
+        this.vertKernal.put(2,2,1.0f);
 
         this.threshHold = threshHold;
         this.preserveSaturation = preserveSaturation;
@@ -102,9 +102,9 @@ public class SobelFilter implements Filter {
             float gradient;
 
             //sum pass;
-            horzSum = (float) ColorMatrixBuilder.getNeighborColorMatrix(grayImage, (color) -> color.getBlue(), WIDTH, c.x(), c.y()).mul(
+            horzSum = ColorMatrixBuilder.getNeighborColorMatrix(grayImage, (color) -> ColorHelper.IntChannelToFloat( color.getBlue() ), WIDTH, c.x(), c.y()).mul(
                     horzKernal).sum();
-            vertSum = (float) ColorMatrixBuilder.getNeighborColorMatrix(grayImage, (color) -> color.getBlue(), WIDTH, c.x(), c.y()).mul(
+            vertSum = ColorMatrixBuilder.getNeighborColorMatrix(grayImage, (color) -> ColorHelper.IntChannelToFloat(  color.getBlue() ), WIDTH, c.x(), c.y()).mul(
                     vertKernal).sum();
 
             orientation = (float) Math.atan( vertSum/horzSum );
@@ -113,7 +113,7 @@ public class SobelFilter implements Filter {
                 gradient = ColorHelper.GradientNormalize( vertSum + horzSum );
             }
             else {
-                gradient =  ColorHelper.GradientNormalize((float) Math.sqrt(Math.pow(vertSum, 2) + Math.pow(horzSum, 2)));
+                gradient = ColorHelper.GradientNormalize(  (float) Math.sqrt(Math.pow(vertSum, 2) + Math.pow(horzSum, 2)) );
             }
 
             //apply

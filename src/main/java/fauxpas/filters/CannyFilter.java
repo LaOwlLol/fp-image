@@ -22,72 +22,72 @@ import fauxpas.entities.ColorHelper;
 import fauxpas.entities.ColorMatrixBuilder;
 import fauxpas.entities.ImageHelper;
 import fauxpas.entities.Range;
-import org.jblas.DoubleMatrix;
+import org.jblas.FloatMatrix;
 
 import java.awt.image.BufferedImage;
 
 /**
- * An canny edge filter which implements Non-maximum suppression, Double threshold, and Edge tracking by hysteresis described at https://en.wikipedia.org/wiki/Canny_edge_detector
+ * An canny edge filter which implements Non-maximum suppression, double threshold, and Edge tracking by hysteresis described at https://en.wikipedia.org/wiki/Canny_edge_detector
  * This filter should be applied to the output of a sobel operator.
  */
 public class CannyFilter implements Filter{
 
-    private final DoubleMatrix horzKernel;
-    private final DoubleMatrix vertKernel;
-    private final DoubleMatrix posSlopeKernel;
-    private final DoubleMatrix negSlopeKernel;
+    private final FloatMatrix horzKernel;
+    private final FloatMatrix vertKernel;
+    private final FloatMatrix posSlopeKernel;
+    private final FloatMatrix negSlopeKernel;
     private final int WIDTH = 3;
-    private final double lowerThreshHold;
-    private final double upperThreshHold;
+    private final float lowerThreshHold;
+    private final float upperThreshHold;
 
     public CannyFilter() {
-        this(0.05, 0.35 );
+        this(0.05f, 0.35f );
     }
 
-    public CannyFilter(double lowerThreshHold, double upperThreshHold) {
-        this.horzKernel = new DoubleMatrix(WIDTH, WIDTH);
-        this.horzKernel.put(0,0, 0.0);
-        this.horzKernel.put( 0, 1, 1.0);
-        this.horzKernel.put(0,2, 0.0);
-        this.horzKernel.put(1,0, 0.0);
-        this.horzKernel.put(1,1, 0.0);
-        this.horzKernel.put(1,2, 0.0);
-        this.horzKernel.put(2,0, 0.0);
-        this.horzKernel.put(2,1,1.0);
-        this.horzKernel.put(2,2,0.0);
+    public CannyFilter(float lowerThreshHold, float upperThreshHold) {
+        this.horzKernel = new FloatMatrix(WIDTH, WIDTH);
+        this.horzKernel.put(0,0, 0.0f);
+        this.horzKernel.put( 0, 1, 1.0f);
+        this.horzKernel.put(0,2, 0.0f);
+        this.horzKernel.put(1,0, 0.0f);
+        this.horzKernel.put(1,1, 0.0f);
+        this.horzKernel.put(1,2, 0.0f);
+        this.horzKernel.put(2,0, 0.0f);
+        this.horzKernel.put(2,1,1.0f);
+        this.horzKernel.put(2,2,0.0f);
 
-        this.vertKernel = new DoubleMatrix(WIDTH, WIDTH);
-        this.vertKernel.put(0,0, 0.0);
-        this.vertKernel.put(1,0,0.0);
-        this.vertKernel.put(2,0,  0.0);
-        this.vertKernel.put(0,1,  1.0);
-        this.vertKernel.put(1,1,0.0);
-        this.vertKernel.put(2,1,1.0);
-        this.vertKernel.put(0,2, 0.0);
-        this.vertKernel.put(1,2,  0.0);
-        this.vertKernel.put(2,2,  0.0);
+        this.vertKernel = new FloatMatrix(WIDTH, WIDTH);
+        this.vertKernel.put(0,0, 0.0f);
+        this.vertKernel.put(1,0,0.0f);
+        this.vertKernel.put(2,0,  0.0f);
+        this.vertKernel.put(0,1,  1.0f);
+        this.vertKernel.put(1,1, 0.0f);
+        this.vertKernel.put(2,1, 1.0f);
+        this.vertKernel.put(0,2, 0.0f);
+        this.vertKernel.put(1,2,  0.0f);
+        this.vertKernel.put(2,2,  0.0f);
 
-        this.posSlopeKernel = new DoubleMatrix(WIDTH, WIDTH);
-        this.posSlopeKernel.put(0, 0, 0.0);
-        this.posSlopeKernel.put(1,0,  0.0);
-        this.posSlopeKernel.put(2,0,1.0);
-        this.posSlopeKernel.put(0,1,  0.0);
-        this.posSlopeKernel.put(1,1,  0.0);
-        this.posSlopeKernel.put(2,1,  0.0);
-        this.posSlopeKernel.put(0,2,  1.0);
-        this.posSlopeKernel.put(1,2,  0.0);
-        this.posSlopeKernel.put(2,2,   0.0);
+        this.posSlopeKernel = new FloatMatrix(WIDTH, WIDTH);
+        this.posSlopeKernel.put(0, 0, 0.0f);
+        this.posSlopeKernel.put(1,0,  0.0f);
+        this.posSlopeKernel.put(2,0, 1.0f);
+        this.posSlopeKernel.put(0,1,  0.0f);
+        this.posSlopeKernel.put(1,1,  0.0f);
+        this.posSlopeKernel.put(2,1,  0.0f);
+        this.posSlopeKernel.put(0,2,  1.0f);
+        this.posSlopeKernel.put(1,2,  0.0f);
+        this.posSlopeKernel.put(2,2,   0.0f);
 
-        this.negSlopeKernel = new DoubleMatrix(WIDTH, WIDTH);
-        this.negSlopeKernel.put(0,0,  1.0);
-        this.negSlopeKernel.put(1,0,  0.0);
-        this.negSlopeKernel.put(2,0,  0.0);
-        this.negSlopeKernel.put(0,1,  0.0);
-        this.negSlopeKernel.put(1,1,  0.0);
-        this.negSlopeKernel.put(2,1,  0.0);
-        this.negSlopeKernel.put(0,2,  0.0);
-        this.negSlopeKernel.put(1,2,  0.0);
-        this.negSlopeKernel.put(2,2,  1.0);
+        this.negSlopeKernel = new FloatMatrix(WIDTH, WIDTH);
+        this.negSlopeKernel.put(0,0,  1.0f);
+        this.negSlopeKernel.put(1,0,  0.0f);
+        this.negSlopeKernel.put(2,0,  0.0f);
+        this.negSlopeKernel.put(0,1,  0.0f);
+        this.negSlopeKernel.put(1,1,  0.0f);
+        this.negSlopeKernel.put(2,1,  0.0f);
+        this.negSlopeKernel.put(0,2,  0.0f);
+        this.negSlopeKernel.put(1,2,  0.0f);
+        this.negSlopeKernel.put(2,2,  1.0f);
 
         this.upperThreshHold = upperThreshHold;
         this.lowerThreshHold = lowerThreshHold;
@@ -106,10 +106,10 @@ public class CannyFilter implements Filter{
 
                 float orientation = ColorHelper.Hue( color );
                 float gradient =  ColorHelper.Saturation( color ) ;
-                double kernelSum = 0.0;
+                float kernelSum = 0.0f;
                 int gray = ColorHelper.FloatChannelToInt(gradient);
 
-                //NOTE: for the sake of speed we are ignoring double comparison errors.
+                //NOTE: for the sake of speed we are ignoring float comparison errors.
 
                 //horizontal line
                 if ( ((orientation > 337.5 && orientation <= 360 ) || ( orientation > 0 && orientation <= 22.5 )) ||
