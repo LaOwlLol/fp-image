@@ -6,7 +6,7 @@
  * user guide available at https://docs.gradle.org/4.3.1/userguide/java_library_plugin.html
  */
 
-version = '0.4.5b'
+version = '0.5.0b'
 
 apply plugin: 'java'
 apply plugin: 'java-library'

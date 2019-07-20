@@ -52,7 +52,7 @@ public class Sample {
         }
 
         return this.area.get().filter( c -> (c.x() < source.getWidth() && c.y() < source.getHeight()) ).map(
-            c -> new Pixel( c, source.getRGB(c.x(), c.y()) )
+            c -> new Pixel( c,  ColorHelper.ColorFromColorValue( source.getRGB(c.x(), c.y()) ) )
         );
     }
 

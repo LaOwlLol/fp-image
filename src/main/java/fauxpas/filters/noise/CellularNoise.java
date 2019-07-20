@@ -18,14 +18,13 @@
 
 package fauxpas.filters.noise;
 
-import fauxpas.entities.ColorHelper;
-import fauxpas.entities.ImageHelper;
-import fauxpas.entities.Range;
+import fauxpas.entities.Pixel;
+
 import fauxpas.fastnoise.FastNoise;
 import fauxpas.filters.Filter;
 
-import java.awt.image.BufferedImage;
 import java.util.Random;
+import java.util.stream.Stream;
 
 public class CellularNoise implements Filter {
 
@@ -53,17 +52,11 @@ public class CellularNoise implements Filter {
     }
 
     @Override
-    public BufferedImage apply(BufferedImage image) {
-
-        BufferedImage buffer = ImageHelper.AllocateARGBBuffer(image.getWidth(), image.getHeight());
-
-        new Range(0, image.getWidth(), 0, image.getHeight()).get().forEach( c -> {
-                int color =  ColorHelper.FloatChannelToInt((this.fastNoise.GetNoise(this.frequencyX * c.x(), this.frequencyY * c.y())/2)+0.5f);
-                buffer.setRGB(c.x(), c.y(), ColorHelper.ColorValueFromRGBA(color, color, color, 255));
+    public Stream<Pixel> apply(Stream<Pixel> sample) {
+        return sample.map( p -> {
+                float color = (this.fastNoise.GetNoise(this.frequencyX * p.x(), this.frequencyY * p.y())/2)+0.5f;
+                return new Pixel(p.getCoordinate(), color, color, color, 1.0f);
             }
         );
-
-        return buffer;
     }
-
 }

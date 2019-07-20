@@ -18,15 +18,13 @@
 
 package fauxpas.filters;
 
-import fauxpas.entities.ColorHelper;
-import fauxpas.entities.ColorMatrixBuilder;
-import fauxpas.entities.ImageHelper;
-import fauxpas.entities.Range;
+import fauxpas.entities.*;
 
 import org.jblas.FloatMatrix;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.util.stream.Stream;
 
 /**
  * A sobel operator filter.
@@ -37,9 +35,9 @@ import java.awt.image.BufferedImage;
  *
  * If the manhattan option is set the threshold with be compared to the l1 norm gx+gy instead of the default l2 norm sqrt(gx^2+gy^2).  This can be an optimization but the resulting image will contain more color pixel which may not be the best result for passing to a canny edge detector.
  *
- * This filter should be run on the output of a smoothing or noise reduction filter like a GaussianBlur.
+ * This filter should be run on the output of a smoothing or noise reduction filter like a GaussianBlur then a GrayScale filter.
  */
-public class SobelFilter implements Filter {
+public class SobelFilter implements Mixer {
 
     private final int WIDTH = 3;
 
@@ -87,14 +85,9 @@ public class SobelFilter implements Filter {
     }
 
     @Override
-    public BufferedImage apply(BufferedImage image) {
+    public Stream<Pixel> apply(Stream<Pixel> sample, BufferedImage image) {
 
-        //make sure it's gray.
-        BufferedImage grayImage = new GrayscaleFilter().apply(image);
-
-        BufferedImage buffer = ImageHelper.AllocateARGBBuffer(image.getWidth(), image.getHeight());
-
-        new Range(0, image.getWidth(), 0, image.getHeight()).get().forEach(c -> {
+        return sample.filter(p ->  p.x() < image.getWidth() && p.y() < image.getHeight()).map(p1 -> {
 
             float orientation;
             float horzSum;
@@ -102,10 +95,18 @@ public class SobelFilter implements Filter {
             float gradient;
 
             //sum pass;
-            horzSum = ColorMatrixBuilder.getNeighborColorMatrix(grayImage, (color) -> ColorHelper.IntChannelToFloat( color.getBlue() ), WIDTH, c.x(), c.y()).mul(
-                    horzKernal).sum();
-            vertSum = ColorMatrixBuilder.getNeighborColorMatrix(grayImage, (color) -> ColorHelper.IntChannelToFloat(  color.getBlue() ), WIDTH, c.x(), c.y()).mul(
-                    vertKernal).sum();
+            horzSum = ColorMatrixBuilder.getNeighborColorMatrix(
+                image,
+                (color) -> ColorHelper.IntChannelToFloat( color.getGreen() ),
+                WIDTH,
+                p1.x(), p1.y()
+            ).mul(horzKernal).sum();
+            vertSum = ColorMatrixBuilder.getNeighborColorMatrix(
+                image,
+                (color) -> ColorHelper.IntChannelToFloat( color.getGreen() ),
+                WIDTH,
+                p1.x(), p1.y()
+            ).mul(vertKernal).sum();
 
             orientation = (float) Math.atan( vertSum/horzSum );
 
@@ -118,33 +119,28 @@ public class SobelFilter implements Filter {
 
             //apply
             if ( gradient > this.threshHold ) {
-                Color hsb = ColorHelper.ColorFromRGBValue(
-                    Color.HSBtoRGB( orientation,
-                        (preserveSaturation) ? ColorHelper.Saturation(image.getRGB(c.x(), c.y())) : 1.0f,
+                Color hsb = ColorHelper.ColorFromColorValue(
+                    Color.HSBtoRGB(
+                        orientation,
+                        (preserveSaturation) ? ColorHelper.Saturation(image.getRGB(p1.x(), p1.y())) : 1.0f,
                         Math.min(1.0f, gradient )
                     )
                 );
-                buffer.setRGB(
-                    c.x(),
-                    c.y(),
-                    ColorHelper.ColorValueFromRGBA(
-                        hsb.getRed(),
-                        hsb.getGreen(),
-                        hsb.getBlue(),
-                        ColorHelper.ColorFromRGBValue( image.getRGB(c.x(), c.y()) ).getAlpha()
-                    )
+                return new Pixel(
+                    p1.getCoordinate(),
+                    hsb.getRed(),
+                    hsb.getGreen(),
+                    hsb.getBlue(),
+                    ColorHelper.ColorFromColorValue( image.getRGB(p1.x(), p1.y()) ).getAlpha()
                 );
             }
             else {
-                buffer.setRGB(c.x(), c.y(),
-                        ColorHelper.ColorValueFromRGBA(
-                            0, 0, 0,
-                            ColorHelper.ColorFromRGBValue( image.getRGB(c.x(), c.y()) ).getAlpha()
-                        )
+                return new Pixel(
+                    p1.getCoordinate(),
+                    0f, 0f, 0f,
+                    ColorHelper.ColorFromColorValue( image.getRGB(p1.x(), p1.y()) ).getAlpha()
                 );
             }
         });
-
-        return buffer;
     }
 }

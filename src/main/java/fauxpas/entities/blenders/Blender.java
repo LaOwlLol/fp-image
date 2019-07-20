@@ -18,8 +18,9 @@
 
 package fauxpas.entities.blenders;
 
-import java.awt.Color;
+
+import fauxpas.entities.Pixel;
 
 public interface Blender {
-    Color calc(Color c1, Color c2);
+    Pixel calc(Pixel p1, Pixel p2);
 }

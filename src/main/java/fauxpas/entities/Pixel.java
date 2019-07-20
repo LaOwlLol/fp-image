@@ -18,7 +18,6 @@
 
 package fauxpas.entities;
 
-
 import java.awt.Color;
 
 /**
@@ -26,27 +25,47 @@ import java.awt.Color;
  */
 public class Pixel {
 
-    private Color color;
-    private Coordinate coordinate;
 
-    /**
-     * Construct a pixel from a coordinate and color
-     * @param coordinate location of pixel
-     * @param color pixel display values
-     */
-    public Pixel(Coordinate coordinate, int color) {
-        this(coordinate, new Color( color ));
+    private Coordinate coordinate;
+    private float red;
+    private float green;
+    private float blue;
+    private float alpha;
+
+
+    public Pixel(Coordinate coordinate, Color color) {
+        this(coordinate, color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
     }
 
+    /**
+     * Construct a pixel from a coordinate and color
+     * @param coordinate location of pixel
+     * @param red pixel display color channel value
+     * @param green pixel display color channel value
+     * @param blue pixel display color channel value
+     */
+    public Pixel(Coordinate coordinate, int red, int green, int blue, int alpha) {
+        this(coordinate,
+            ColorHelper.IntChannelToFloat( red ),
+            ColorHelper.IntChannelToFloat( green ),
+            ColorHelper.IntChannelToFloat( blue ),
+            ColorHelper.IntChannelToFloat( alpha )
+        );
+    }
 
     /**
      * Construct a pixel from a coordinate and color
      * @param coordinate location of pixel
-     * @param color pixel display values
+     * @param red pixel display color channel value
+     * @param green pixel display color channel value
+     * @param blue pixel display color channel value
      */
-    public Pixel(Coordinate coordinate, Color color) {
+    public Pixel(Coordinate coordinate, float red, float green, float blue, float alpha) {
         this.coordinate = coordinate;
-        this.color = color;
+        this.red = red;
+        this.green = green;
+        this.blue = blue;
+        this.alpha = alpha;
     }
 
     public int x() {
@@ -56,22 +75,33 @@ public class Pixel {
         return this.coordinate.y();
     }
 
-    public int getRed() {
-        return color.getRed();
+    public float getRed() {
+        return red;
     }
 
-    public int getGreen() {
-        return color.getGreen();
+    public float getGreen() {
+        return green;
     }
 
-    public int getBlue() {
-        return color.getBlue();
+    public float getBlue() {
+        return blue;
     }
 
-    public int getOpacity() {
-        return color.getAlpha();
+    public float getAlpha() {
+        return alpha;
     }
 
-    public Color getColor() { return color; }
+    public Coordinate getCoordinate() {
+        return coordinate;
+    }
+
+    public Color getColor() {
+        return ColorHelper.ColorFromRGBA(
+            ColorHelper.FloatChannelToInt(red),
+            ColorHelper.FloatChannelToInt(green),
+            ColorHelper.FloatChannelToInt(blue),
+            ColorHelper.FloatChannelToInt(alpha)
+        );
+    }
 
 }

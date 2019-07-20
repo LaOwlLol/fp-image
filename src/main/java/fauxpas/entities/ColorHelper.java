@@ -25,14 +25,18 @@ public class ColorHelper {
     public static int ColorValueFromRGBA(int r, int g, int b, int a ) {
         return new Color(r, g, b, a).getRGB();
     }
-    public static Color ColorFromRGBValue(int color){ return new Color(color); }
+    public static Color ColorFromColorValue(int color){ return new Color(color); }
+    public static int ColorValueFromColor(Color color) { return color.getRGB(); }
+    public static Color ColorFromRGBA(int r, int g, int b, int a) {
+        return ColorFromColorValue( ColorValueFromRGBA(r, g, b, a) );
+    }
 
-    public static int Luminance(Color color, float redBalance, float greenBalance, float blueBalance) {
-        return Math.min(255,(int) ColorMatrixBuilder.getColorColumnVector(color).dot(
+    public static float Luminance(Color color, float redBalance, float greenBalance, float blueBalance) {
+        return Math.min(1.0f ,ColorMatrixBuilder.getColorColumnVector(color).dot(
             ColorMatrixBuilder.getColorColumnVector(redBalance, greenBalance, blueBalance) ) );
     }
 
-    public static int Luminance(Color color) {
+    public static float Luminance(Color color) {
         return Luminance(color, 0.3f, 0.59f, 0.11f);
     }
 
@@ -43,7 +47,7 @@ public class ColorHelper {
     }
 
     public static float Brightness(int color) {
-        return Brightness( ColorFromRGBValue(color) );
+        return Brightness( ColorFromColorValue(color) );
     }
 
     public static float Saturation(Color color) {
@@ -53,7 +57,7 @@ public class ColorHelper {
     }
 
     public static float Saturation(int color) {
-        return Saturation( ColorFromRGBValue(color) );
+        return Saturation( ColorFromColorValue(color) );
     }
 
     public static float Hue(Color color) {
@@ -63,17 +67,27 @@ public class ColorHelper {
     }
 
     public static float Hue(int color) {
-        return Hue( ColorFromRGBValue(color) );
+        return Hue( ColorFromColorValue(color) );
     }
 
-    public static int Alpha(int color) {
-        return ColorFromRGBValue(color).getAlpha();
+    public static float Alpha(int color) {
+        return  IntChannelToFloat( ColorFromColorValue(color).getAlpha() );
     }
 
-    public static float EuclidianDistance(Color a, Color b) {
-        return (float) ( Math.pow( IntChannelToFloat( a.getRed() - b.getRed() ), 2) +
+    public static float EuclidianDistance(Color a, Color b, boolean manhattan) {
+        /*return (float) ( Math.pow( IntChannelToFloat( a.getRed() - b.getRed() ), 2) +
             Math.pow( IntChannelToFloat( a.getGreen() - b.getGreen() ), 2) +
-            Math.pow( IntChannelToFloat( a.getBlue() - b.getBlue() ), 2) );
+            Math.pow( IntChannelToFloat( a.getBlue() - b.getBlue() ), 2) );*/
+        if (manhattan) {
+            return ColorMatrixBuilder.getColorColumnVector(a)
+                .subi(ColorMatrixBuilder.getColorColumnVector(b))
+                .norm1();
+        }
+        else {
+            return ColorMatrixBuilder.getColorColumnVector(a)
+                .subi(ColorMatrixBuilder.getColorColumnVector(b))
+                .norm2();
+        }
     }
 
     public static float IntChannelToFloat(int i) {
@@ -87,4 +101,5 @@ public class ColorHelper {
     public static float GradientNormalize(float v) {
         return ((1.0f / (1.0f + (float) Math.exp(-v))) * 2.0f) - 1.0f;
     }
+
 }

@@ -18,13 +18,13 @@
 
 package fauxpas.filters;
 
+
 import fauxpas.entities.ColorHelper;
-import fauxpas.entities.ImageHelper;
-import fauxpas.entities.Sample;
+import fauxpas.entities.Pixel;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-
+import java.util.stream.Stream;
 
 /**
  * Filter the pixels that are within the threshold of the key color.
@@ -39,6 +39,7 @@ public class ChromaKeyFilter implements Filter {
     private Color source_color;
     private BufferedImage source_image;
     private float threshold;
+    private boolean manhattan;
 
     public ChromaKeyFilter() {
         this(Color.GREEN, null, null, 0.1f);
@@ -57,36 +58,36 @@ public class ChromaKeyFilter implements Filter {
     }
 
     private ChromaKeyFilter(Color key_color, Color source_color, BufferedImage source_image, float threshold) {
+        this(key_color, source_color, ((source_image != null) ? source_image : null), threshold, false);
+    }
+
+    private ChromaKeyFilter(Color key_color, Color source_color, BufferedImage source_image, float threshold, boolean manhattan) {
         this.key_color = key_color;
         this.source_color = source_color;
         this.source_image = ((source_image != null) ? source_image : null);
         this.threshold = threshold;
+        this.manhattan = manhattan;
     }
 
     @Override
-    public BufferedImage apply(BufferedImage image) {
-
-        BufferedImage buffer = ImageHelper.AllocateARGBBuffer(image.getWidth(), image.getHeight());
-
-        new Sample().get(image).forEach( p -> {
-            float delta = ColorHelper.EuclidianDistance(key_color, p.getColor());
+    public Stream<Pixel> apply(Stream<Pixel> sample) {
+        return sample.map( p -> {
+            float delta = ColorHelper.EuclidianDistance(key_color, p.getColor(), manhattan);
 
             if (delta < threshold) {
                 if ( source_image != null ) {
-                    buffer.setRGB(p.x(), p.y(), source_image.getRGB(p.x(), p.y()));
+                    return new Pixel(p.getCoordinate(), ColorHelper.ColorFromColorValue( source_image.getRGB(p.x(), p.y()) ) );
                 }
                 else if (source_color != null) {
-                    buffer.setRGB(p.x(), p.y(), source_color.getRGB());
+                    return new Pixel(p.getCoordinate(), source_color);
                 }
                 else {
-                    buffer.setRGB(p.x(), p.y(), ColorHelper.ColorValueFromRGBA(p.getRed(), p.getGreen(), p.getBlue(), 0));
+                    return new Pixel(p.getCoordinate(), p.getRed(), p.getGreen(), p.getBlue(), 0.0f);
                 }
             }
             else {
-                buffer.setRGB(p.x(), p.y(), p.getColor().getRGB());
+                return p;
             }
         });
-
-        return buffer;
     }
 }

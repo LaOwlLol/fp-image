@@ -19,11 +19,8 @@
 package fauxpas.filters;
 
 import fauxpas.entities.ColorHelper;
-import fauxpas.entities.ImageHelper;
-import fauxpas.entities.Sample;
-
-import java.awt.image.BufferedImage;
-
+import fauxpas.entities.Pixel;
+import java.util.stream.Stream;
 
 /**
  * Filter colors to gray.
@@ -53,17 +50,12 @@ public class GrayscaleFilter implements Filter {
     }
 
     @Override
-    public BufferedImage apply(BufferedImage image) {
+    public Stream<Pixel> apply(Stream<Pixel> sample) {
+        return sample.map( p-> {
+            float gray = ColorHelper.Luminance( p.getColor(), this.redBalance, this.greenBalance, this.blueBalance );
 
-        BufferedImage buffer = ImageHelper.AllocateARGBBuffer(image.getWidth(), image.getHeight());
-
-        new Sample().get(image).forEach( p-> {
-            int gray = ColorHelper.Luminance( p.getColor(), this.redBalance, this.greenBalance, this.blueBalance );
-
-            buffer.setRGB(p.x(), p.y(), ColorHelper.ColorValueFromRGBA(gray, gray, gray, p.getOpacity()));
+            return new Pixel(p.getCoordinate(), gray, gray, gray, p.getAlpha() );
         });
-
-        return buffer;
     }
 
 }

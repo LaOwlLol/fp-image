@@ -18,11 +18,9 @@
 
 package fauxpas.filters;
 
-import fauxpas.entities.ColorHelper;
-import fauxpas.entities.ImageHelper;
-import fauxpas.entities.Sample;
+import fauxpas.entities.Pixel;
 
-import java.awt.image.BufferedImage;
+import java.util.stream.Stream;
 
 /**
  * A filter for transforming the luminance of a pixels to transparency.  Meaning pixels close to white (or the gray balance provided by a GrayscaleFilter), become transparent
@@ -42,23 +40,15 @@ public class ChromaLuminanceFilter implements Filter {
     }
 
     @Override
-    public BufferedImage apply(BufferedImage image) {
+    public Stream<Pixel> apply(Stream<Pixel> sample) {
 
-        BufferedImage buffer = ImageHelper.AllocateARGBBuffer(image.getWidth(), image.getHeight());
-
-        new Sample().get(grayFilter.apply(image)).forEach( p-> {
-
-            buffer.setRGB(
-                p.x(), p.y(), ColorHelper.ColorValueFromRGBA(
-                    p.getRed(),
-                    p.getGreen(),
-                    p.getBlue(),
-                    Math.min( p.getOpacity(), 255-p.getRed() )
-                )
-            );
-        });
-
-        return buffer;
+        return grayFilter.apply(sample).map( p-> new Pixel(
+            p.getCoordinate(),
+            p.getRed(),
+            p.getGreen(),
+            p.getBlue(),
+            Math.min( p.getAlpha(), 1.0f-p.getRed() )
+        ));
     }
 
 }

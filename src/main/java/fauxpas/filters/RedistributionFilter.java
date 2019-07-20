@@ -18,45 +18,38 @@
 
 package fauxpas.filters;
 
-import fauxpas.entities.ColorHelper;
-import fauxpas.entities.ImageHelper;
-import fauxpas.entities.Sample;
+import fauxpas.entities.Pixel;
 
-import java.awt.image.BufferedImage;
+import java.util.stream.Stream;
 
 /**
  * A utility filter for manipulating the contrast in an image.
  */
 public class RedistributionFilter implements Filter {
 
-    private final double pow;
+    private final float pow;
 
     public RedistributionFilter() {
-        this(2.0);
+        this(1.1f);
     }
 
     /**
      *
      * @param power values should be very close to 1.0. power greater than 1.0 will washout decrease contrast. power less than 1.0 will darken the image.
       */
-    public RedistributionFilter(double power) {
+    public RedistributionFilter(float power) {
         this.pow = power;
     }
 
     @Override
-    public BufferedImage apply(BufferedImage image) {
-
-        BufferedImage buffer = ImageHelper.AllocateARGBBuffer(image.getWidth(), image.getHeight());
-
-        new Sample().get(image).forEach(p -> buffer.setRGB(p.x(), p.y(),
-            ColorHelper.ColorValueFromRGBA(
-                Math.min(255, (int) Math.pow( p.getRed(), this.pow )),
-                Math.min(255, (int) Math.pow( p.getGreen(), this.pow )),
-                Math.min(255, (int) Math.pow( p.getBlue(), this.pow )),
-                p.getOpacity()
+    public Stream<Pixel> apply(Stream<Pixel> sample) {
+        return sample.map(p -> new Pixel(
+                p.getCoordinate(),
+                Math.min(1.0f, (float) Math.pow( p.getRed(), this.pow )),
+                Math.min(1.0f, (float) Math.pow( p.getGreen(), this.pow )),
+                Math.min(1.0f, (float) Math.pow( p.getBlue(), this.pow )),
+                p.getAlpha()
             )
-        ));
-
-        return buffer;
+        );
     }
 }

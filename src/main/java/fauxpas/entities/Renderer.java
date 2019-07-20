@@ -21,22 +21,8 @@ package fauxpas.entities;
 import java.awt.image.BufferedImage;
 import java.util.stream.Stream;
 
-public class ImageHelper {
-    public static BufferedImage AllocateARGBBuffer(int width, int height) {
-        return new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-    }
+public interface Renderer {
 
-    public static BufferedImage ARGBBufferRenderer(Stream<Pixel> sample, int width, int height) {
-        BufferedImage buffer = ImageHelper.AllocateARGBBuffer(width, height);
+    BufferedImage render(Stream<Pixel> sample);
 
-        sample.filter(p -> p.x() < width && p.y() < height).forEach( p ->
-            buffer.setRGB(p.x(), p.y(), p.getColor().getRGB())
-        );
-
-        return buffer;
-    }
-
-    public static Stream<Pixel> BufferToPixelSample(BufferedImage buffer) {
-        return new Sample().get(buffer);
-    }
 }

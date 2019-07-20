@@ -18,19 +18,17 @@
 
 package fauxpas.filters;
 
-import fauxpas.entities.ColorHelper;
-import fauxpas.entities.ColorMatrixBuilder;
-import fauxpas.entities.ImageHelper;
-import fauxpas.entities.Range;
+import fauxpas.entities.*;
 import org.jblas.FloatMatrix;
 
 import java.awt.image.BufferedImage;
+import java.util.stream.Stream;
 
 /**
  * An canny edge filter which implements Non-maximum suppression, double threshold, and Edge tracking by hysteresis described at https://en.wikipedia.org/wiki/Canny_edge_detector
  * This filter should be applied to the output of a sobel operator.
  */
-public class CannyFilter implements Filter{
+public class CannyFilter implements Mixer{
 
     private final FloatMatrix horzKernel;
     private final FloatMatrix vertKernel;
@@ -94,67 +92,63 @@ public class CannyFilter implements Filter{
     }
 
     @Override
-    public BufferedImage apply(BufferedImage image) {
+    public Stream<Pixel> apply(Stream<Pixel> sample, BufferedImage image) {
 
-        BufferedImage buffer = ImageHelper.AllocateARGBBuffer(image.getWidth(), image.getHeight());
+        return sample.filter(p ->  p.x() < image.getWidth() && p.y() < image.getHeight()).map( p1 -> {
 
-        new Range(0, image.getWidth(), 0, image.getHeight()).get().forEach( c -> {
-
-            int color = image.getRGB(c.x(), c.y());
+            int color = image.getRGB(p1.x(), p1.y());
 
             if (ColorHelper.Brightness(color) != 0.0) {
 
                 float orientation = ColorHelper.Hue( color );
                 float gradient =  ColorHelper.Saturation( color ) ;
                 float kernelSum = 0.0f;
-                int gray = ColorHelper.FloatChannelToInt(gradient);
 
                 //NOTE: for the sake of speed we are ignoring float comparison errors.
 
                 //horizontal line
                 if ( ((orientation > 337.5 && orientation <= 360 ) || ( orientation > 0 && orientation <= 22.5 )) ||
                         (orientation > 157.5 && orientation <= 202.5 )) {
-                    kernelSum = horzKernel.mul(ColorMatrixBuilder.getNeighborColorMatrix(image, ColorHelper::Brightness, WIDTH, c.x(), c.y())).sum();
+                    kernelSum = horzKernel.mul(ColorMatrixBuilder.getNeighborColorMatrix(image, ColorHelper::Brightness, WIDTH, p1.x(), p1.y())).sum();
                 }
                 //vertical line
                 else if ( (orientation > 67.5 && orientation >= 112.5) || ( orientation > 247.5 && orientation <= 292.5 ) ) {
-                    kernelSum  = vertKernel.mul(ColorMatrixBuilder.getNeighborColorMatrix(image, ColorHelper::Brightness, WIDTH, c.x(), c.y())).sum();
+                    kernelSum  = vertKernel.mul(ColorMatrixBuilder.getNeighborColorMatrix(image, ColorHelper::Brightness, WIDTH, p1.x(), p1.y())).sum();
                 }
                 //positive slope
                 else if ( (orientation > 22.5 && orientation >= 67.5) || ( orientation > 202.5 && orientation <= 247.5) ) {
-                    kernelSum  = posSlopeKernel.mul(ColorMatrixBuilder.getNeighborColorMatrix(image, ColorHelper::Brightness, WIDTH, c.x(), c.y())).sum();
+                    kernelSum  = posSlopeKernel.mul(ColorMatrixBuilder.getNeighborColorMatrix(image, ColorHelper::Brightness, WIDTH, p1.x(), p1.y())).sum();
                 }
                 //negative slope
                 else if ( (orientation > 112.5 && orientation >= 157.5) || ( orientation > 292.5 && orientation <= 337.5) ) {
-                    kernelSum  = negSlopeKernel.mul(ColorMatrixBuilder.getNeighborColorMatrix(image, ColorHelper::Brightness, WIDTH, c.x(), c.y())).sum();
+                    kernelSum  = negSlopeKernel.mul(ColorMatrixBuilder.getNeighborColorMatrix(image, ColorHelper::Brightness, WIDTH, p1.x(), p1.y())).sum();
                 }
 
                 if (gradient > kernelSum) {
-                    buffer.setRGB(c.x(), c.y(), ColorHelper.ColorValueFromRGBA( gray, gray, gray, ColorHelper.Alpha(color) ));
+                    return new Pixel(p1.getCoordinate(),  gradient, gradient, gradient,  ColorHelper.Alpha(color) );
                 }
                 else if (gradient > this.lowerThreshHold) {
                     if (gradient > this.upperThreshHold) {
-                        buffer.setRGB(c.x(), c.y(), ColorHelper.ColorValueFromRGBA( gray, gray, gray, ColorHelper.Alpha(color) ));
+                        return new Pixel(p1.getCoordinate(), gradient, gradient, gradient, ColorHelper.Alpha(color) );
                     }
-                    else if ( checkSurroundingPixels(image, c.x(), c.y()) ) {
-                        buffer.setRGB(c.x(), c.y(), ColorHelper.ColorValueFromRGBA( gray, gray, gray, ColorHelper.Alpha(color) ));
+                    else if ( checkSurroundingPixels(image, p1.x(), p1.y()) ) {
+                        return new Pixel(p1.getCoordinate(), gradient, gradient, gradient, ColorHelper.Alpha(color) );
                     }
                     else {
-                        buffer.setRGB(c.x(), c.y(), ColorHelper.ColorValueFromRGBA( 0, 0, 0, ColorHelper.Alpha(color) ));
+                        return new Pixel(p1.getCoordinate(), 0f, 0f, 0f, ColorHelper.Alpha(color) );
                     }
                 }
                 else {
-                    buffer.setRGB(c.x(), c.y(), ColorHelper.ColorValueFromRGBA( 0, 0, 0, ColorHelper.Alpha(color) ));
+                    return new Pixel(p1.getCoordinate(),0f, 0f, 0f, ColorHelper.Alpha(color) );
                 }
 
             }
             else {
-                buffer.setRGB(c.x(), c.y(), ColorHelper.ColorValueFromRGBA( 0, 0, 0, ColorHelper.Alpha(color)) );
+                return new Pixel(p1.getCoordinate(), 0f, 0f, 0f, ColorHelper.Alpha(color) );
             }
 
         });
 
-        return buffer;
     }
 
     private boolean checkSurroundingPixels(BufferedImage target, int imageX, int imageY) {

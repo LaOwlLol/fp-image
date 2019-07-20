@@ -19,7 +19,7 @@
 package fauxpas.entities.blenders;
 
 
-import java.awt.Color;
+import fauxpas.entities.Pixel;
 
 /**
  * Composite colors with simple interpolation calculation.
@@ -42,17 +42,18 @@ public class SimpleComposite implements Blender{
 
     /**
      * Calculate color composite with mid point calculation.
-     * @param color1 starting point
-     * @param color2 end point
-     * @return color1.interpolate(color2, this.bias)
+     * @param p1 starting point
+     * @param p2 end point
+     * @return (p2 - p1)*this.bias + p1
      */
     @Override
-    public Color calc(Color color1, Color color2) {
-        return new Color (
-            Math.max( Math.min (255, (int) ((color2.getRed() - color1.getRed())*this.bias) + color1.getRed()), 0),
-            Math.max( Math.min (255, (int) ((color2.getGreen() - color1.getGreen())*this.bias) + color1.getGreen()), 0),
-            Math.max( Math.min (255, (int) ((color2.getBlue() - color1.getBlue())*this.bias) + color1.getBlue()), 0),
-            Math.max( Math.min (255, (int) ((color2.getAlpha() - color1.getAlpha())*this.bias) + color1.getAlpha()), 0)
+    public Pixel calc(Pixel p1, Pixel p2) {
+        return new Pixel (
+            p1.getCoordinate(),
+            Math.max(Math.min(1.0f, (p2.getRed() - p1.getRed())*this.bias + p1.getRed()), 0f),
+            Math.max(Math.min(1.0f, (p2.getGreen() - p1.getGreen())*this.bias + p1.getGreen()), 0f),
+            Math.max(Math.min(1.0f, (p2.getBlue() - p1.getBlue())*this.bias + p1.getBlue()), 0f),
+            Math.max(Math.min(1.0f, (p2.getAlpha() - p1.getAlpha())*this.bias + p1.getAlpha()), 0f)
         );
     }
 }

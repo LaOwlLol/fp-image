@@ -18,19 +18,17 @@
 
 package fauxpas.filters;
 
-import fauxpas.entities.ColorHelper;
-import fauxpas.entities.ColorMatrixBuilder;
-import fauxpas.entities.ImageHelper;
-import fauxpas.entities.Range;
+import fauxpas.entities.*;
 
 import org.jblas.FloatMatrix;
 
 import java.awt.image.BufferedImage;
+import java.util.stream.Stream;
 
 /**
  * A utility for reducing noise in images, by averaging each pixel in an image with it's neighbors.
  */
-public class GaussianBlur implements Filter {
+public class GaussianBlur implements Mixer {
 
     private static final int RED = 0;
     private static final int GREEN = 1;
@@ -82,20 +80,28 @@ public class GaussianBlur implements Filter {
     }
 
     @Override
-    public BufferedImage apply(BufferedImage image) {
-
-        BufferedImage buffer = ImageHelper.AllocateARGBBuffer(image.getWidth(), image.getHeight());
-
-        new Range(0, image.getWidth(), 0, image.getHeight() ).get().forEach( c ->
-            buffer.setRGB(c.x(), c.y(), ColorHelper.ColorValueFromRGBA(
-                (int) (ColorMatrixBuilder.getNeighborColorMatrix(image, (color) -> color.getRed(), this.width, c.x(), c.y()).mul(this.kernel).sum()/this.kernelValue),
-                (int) (ColorMatrixBuilder.getNeighborColorMatrix(image, (color) -> color.getGreen(), this.width, c.x(), c.y()).mul(this.kernel).sum()/this.kernelValue),
-                (int) (ColorMatrixBuilder.getNeighborColorMatrix(image, (color) -> color.getBlue(), this.width, c.x(), c.y()).mul(this.kernel).sum()/this.kernelValue),
-                ColorHelper.ColorFromRGBValue(image.getRGB(c.x(), c.y())).getAlpha()
+    public Stream<Pixel> apply(Stream<Pixel> sample, BufferedImage image) {
+        return sample.filter( p ->  p.x() < image.getWidth() && p.y() < image.getHeight() ).map( p1 ->
+            new Pixel(p1.getCoordinate(),
+                ColorMatrixBuilder.getNeighborColorMatrix(
+                    image,
+                    (color) -> ColorHelper.IntChannelToFloat( color.getRed() ),
+                    this.width,
+                    p1.x(), p1.y()
+                ).mul(this.kernel).sum()/this.kernelValue,
+                ColorMatrixBuilder.getNeighborColorMatrix(
+                    image,
+                    (color) -> ColorHelper.IntChannelToFloat( color.getGreen() ),
+                    this.width, p1.x(), p1.y()
+                ).mul(this.kernel).sum()/this.kernelValue,
+                ColorMatrixBuilder.getNeighborColorMatrix(
+                    image,
+                    (color) -> ColorHelper.IntChannelToFloat( color.getBlue() ),
+                    this.width, p1.x(), p1.y()
+                ).mul(this.kernel).sum()/this.kernelValue,
+                ColorHelper.IntChannelToFloat(ColorHelper.ColorFromColorValue(image.getRGB(p1.x(), p1.y())).getAlpha())
             )
-        )) ;
-
-        return buffer;
+        );
     }
 
 }

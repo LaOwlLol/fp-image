@@ -19,13 +19,15 @@
 package fauxpas.filters;
 
 
-import java.awt.image.BufferedImage;
+import fauxpas.entities.Pixel;
+
+import java.util.stream.Stream;
 
 /**
  *  A filter defines a transformation from one image to another.
  */
 public interface Filter {
 
-    BufferedImage apply(BufferedImage i);
+    Stream<Pixel> apply(Stream<Pixel> s);
 
 }

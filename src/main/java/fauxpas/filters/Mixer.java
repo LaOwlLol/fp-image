@@ -19,10 +19,13 @@
 package fauxpas.filters;
 
 
+import fauxpas.entities.Pixel;
+
 import java.awt.image.BufferedImage;
+import java.util.stream.Stream;
 
 public interface Mixer {
 
-    BufferedImage apply(BufferedImage f, BufferedImage s);
+    Stream<Pixel>  apply(Stream<Pixel> f, BufferedImage s);
 
 }

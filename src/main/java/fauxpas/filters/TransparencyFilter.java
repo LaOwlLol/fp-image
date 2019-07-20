@@ -18,34 +18,23 @@
 
 package fauxpas.filters;
 
-import fauxpas.entities.ColorHelper;
-import fauxpas.entities.ImageHelper;
-import fauxpas.entities.Sample;
-
-import java.awt.image.BufferedImage;
-
+import fauxpas.entities.Pixel;
+import java.util.stream.Stream;
 
 public class TransparencyFilter implements Filter {
 
-    private int alpha;
+    private float alpha;
 
     public TransparencyFilter() {
-        this(127);
+        this(0.5f);
     }
 
-    public TransparencyFilter(int alpha) {
-        this.alpha = Math.max(0, Math.min(alpha, 255));
+    public TransparencyFilter(float alpha) {
+        this.alpha = Math.max(0f, Math.min(alpha, 1.0f));
     }
 
     @Override
-    public BufferedImage apply(BufferedImage image) {
-
-        BufferedImage buffer = ImageHelper.AllocateARGBBuffer(image.getWidth(), image.getHeight());
-
-        new Sample().get(image).forEach(p -> {
-            buffer.setRGB(p.x(), p.y(), ColorHelper.ColorValueFromRGBA(p.getRed(), p.getGreen(), p.getGreen(), this.alpha));
-        });
-
-        return buffer;
+    public Stream<Pixel> apply(Stream<Pixel> sample) {
+        return sample.map(p -> new Pixel(p.getCoordinate(), p.getRed(), p.getGreen(), p.getBlue(), this.alpha));
     }
 }

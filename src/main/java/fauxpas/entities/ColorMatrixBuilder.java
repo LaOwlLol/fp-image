@@ -40,12 +40,12 @@ public class ColorMatrixBuilder {
                     ((imageY+j > 0) && (imageY+j < target.getHeight())) ) {
 
                     colors.put(kernelY, kernelX, colorReader.getColorProperty(
-                        ColorHelper.ColorFromRGBValue(target.getRGB(imageX+i, imageY+j))
+                        ColorHelper.ColorFromColorValue(target.getRGB(imageX+i, imageY+j))
                     ));
                 }
                 else {
                     colors.put(kernelY, kernelX, colorReader.getColorProperty(
-                        ColorHelper.ColorFromRGBValue(target.getRGB(imageX, imageY))
+                        ColorHelper.ColorFromColorValue(target.getRGB(imageX, imageY))
                     ));
                 }
             }
@@ -64,12 +64,12 @@ public class ColorMatrixBuilder {
 
             if ((imageY+i > 0) && (imageY+i < target.getHeight())) {
                 colors.put(y, 0, colorReader.getColorProperty(
-                    ColorHelper.ColorFromRGBValue(target.getRGB(imageX,imageY+i))
+                    ColorHelper.ColorFromColorValue(target.getRGB(imageX,imageY+i))
                 ));
             }
             else {
                 colors.put(y, 0, colorReader.getColorProperty(
-                    ColorHelper.ColorFromRGBValue(target.getRGB(imageX, imageY))
+                    ColorHelper.ColorFromColorValue(target.getRGB(imageX, imageY))
                 ));
             }
         }

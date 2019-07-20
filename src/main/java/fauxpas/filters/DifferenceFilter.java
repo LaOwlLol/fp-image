@@ -18,13 +18,11 @@
 
 package fauxpas.filters;
 
-import fauxpas.entities.ColorHelper;
-import fauxpas.entities.ColorMatrixBuilder;
-import fauxpas.entities.ImageHelper;
-import fauxpas.entities.Sample;
+import fauxpas.entities.*;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.util.stream.Stream;
 
 
 /**
@@ -78,40 +76,21 @@ public class DifferenceFilter implements Mixer {
     }
 
     @Override
-    public BufferedImage apply(BufferedImage f, BufferedImage s) {
-        BufferedImage buffer = ImageHelper.AllocateARGBBuffer(f.getWidth(), f.getHeight());
+    public Stream<Pixel> apply(Stream<Pixel> f, BufferedImage s) {
 
         this.appliedToEqual = true;
 
-        new Sample().get(f).filter( p ->  p.x() < s.getWidth() && p.y() < s.getHeight() ).forEach(p -> {
-            float delta;
-            if (!manhattan) {
-                delta = ColorMatrixBuilder.getColorColumnVector( p.getColor() )
-                    .subi(
-                        ColorMatrixBuilder.getColorColumnVector(
-                            ColorHelper.ColorFromRGBValue(s.getRGB(p.x(), p.y()))
-                        )
-                    )
-                    .norm2();
-            }
-            else {
-                delta = ColorMatrixBuilder.getColorColumnVector( p.getColor() )
-                    .subi(
-                        ColorMatrixBuilder.getColorColumnVector(
-                            ColorHelper.ColorFromRGBValue( s.getRGB(p.x(), p.y()) )
-                        )
-                    )
-                    .norm1();
-            }
+        return f.filter( p ->  p.x() < s.getWidth() && p.y() < s.getHeight() ).map(p -> {
+            float delta = ColorHelper.EuclidianDistance(p.getColor()
+                , ColorHelper.ColorFromColorValue(s.getRGB(p.x(), p.y())),
+                manhattan);
 
             if ( delta < threshold) {
-                buffer.setRGB(p.x(), p.y(), equal.getRGB());
+                return new Pixel(p.getCoordinate(), equal);
             } else {
-                buffer.setRGB(p.x(), p.y(), diff.getRGB());
                 this.appliedToEqual = false;
+                return new Pixel(p.getCoordinate(), diff);
             }
         });
-
-        return buffer;
     }
 }

@@ -18,8 +18,7 @@
 
 package fauxpas.entities.blenders;
 
-
-import java.awt.Color;
+import fauxpas.entities.Pixel;
 
 /**
  * Sum of two colors, with optional scalars.
@@ -35,17 +34,18 @@ public class ColorSum implements Blender {
 
     /**
      * Calculate the sum of two colors.
-     * @param color1 a color to add.
-     * @param color2 another color to add.
+     * @param p1 a color to add.
+     * @param p2 another color to add.
      * @return a new color from source color components, including opacity, added.
      */
     @Override
-    public Color calc(Color color1, Color color2) {
-        return new Color(
-            Math.min(255, color1.getRed() + color2.getRed()),
-            Math.min(255, color1.getGreen() +  color2.getGreen()),
-            Math.min(255, color1.getBlue() + color2.getBlue()),
-            Math.min(255, color1.getAlpha() + color2.getAlpha())
+    public Pixel calc(Pixel p1, Pixel p2) {
+        return new Pixel(
+            p1.getCoordinate(),
+            Math.min(1.0f, p1.getRed() + p2.getRed()),
+            Math.min(1.0f, p1.getGreen() +  p2.getGreen()),
+            Math.min(1.0f, p1.getBlue() + p2.getBlue()),
+            Math.min(1.0f, p1.getAlpha() + p2.getAlpha())
         );
     }
 }
