@@ -21,13 +21,13 @@ package fauxpas.entities;
 import fauxpas.filters.Filter;
 
 import java.awt.image.BufferedImage;
-import java.util.ArrayDeque;
-import java.util.Deque;
+
+import java.util.ArrayList;
 import java.util.Stack;
 import java.util.stream.Stream;
 
 /**
- * A wrapper for javafx.scene.image.Image to apply fauxpas.filters to.
+ * A wrapper for javafx.scene.image.Image to apply fauxpas.deck to.
  */
 public class FilterableImage {
 
@@ -35,7 +35,7 @@ public class FilterableImage {
     private int height;
     private BufferedImage maintainedImage;
     private Renderer renderer;
-    private Deque<Filter> filters;
+    private ArrayList<Filter> deck;
 
     /**
      * Construct with dimensions.
@@ -59,7 +59,7 @@ public class FilterableImage {
         this.height = maintainedImage.getHeight();
         this.maintainedImage = maintainedImage;
         this.renderer = renderer;
-        this.filters = new ArrayDeque<Filter>() {
+        this.deck = new ArrayList<Filter>() {
         };
     }
 
@@ -71,30 +71,28 @@ public class FilterableImage {
         return height;
     }
 
-    /**
-     * Access image
-     * @return The image wrapped.
-     */
-    public BufferedImage getImage() {
-        return this.maintainedImage;
+    public Stream<Filter> getFilterDeck() {
+        return deck.stream();
     }
 
-    /**
-     * Set the wrapped image.
-     * @param image replacement pixel source
-     */
-    public void setImage(BufferedImage image) {
-        this.width = image.getWidth();
-        this.height = image.getHeight();
-        this.maintainedImage = image;
+    public Stream<Pixel> sample(Selection selection) {
+        return ImageHelper.SampleImage(this.maintainedImage, selection);
+    }
+
+    public Stream<Pixel> sample() {
+        return this.sample(null);
     }
 
     /**
      * Apply an filter to the wrapped image.
      * @param filter to apply
      */
-    public void applyFilter(Filter filter) {
-        filters.addLast(filter);
+    public void addFilter(Filter filter) {
+        deck.add(filter);
+    }
+
+    public BufferedImage render() {
+        return render(null);
     }
 
     public BufferedImage render(Selection selection) {
@@ -102,19 +100,19 @@ public class FilterableImage {
             this.maintainedImage = ImageHelper.AllocateARGBBuffer(this.width, this.height);
         }
 
-        if (filters.size() == 0) {
+        if (deck.size() == 0) {
             return this.maintainedImage;
         }
 
-        Stack<Stream<Pixel>> image = new Stack<>();
-        image.push(ImageHelper.SampleImage( this.maintainedImage, selection ));
+        Stack<Stream<Pixel>> resultBuffer = new Stack<>();
+        resultBuffer.push(this.sample(selection));
 
-        filters.stream().sorted().forEach( f -> {
-            image.push( f.apply(image.pop()) ) ;
+        this.getFilterDeck().forEachOrdered(f -> {
+            resultBuffer.push( f.apply(resultBuffer.pop()) ) ;
         } );
 
 
-        return this.renderer.render(image.pop(), this.width, this.height);
+        return this.renderer.render(resultBuffer.pop(), this.width, this.height);
     }
 
 }
