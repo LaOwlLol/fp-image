@@ -76,6 +76,14 @@ public class Range implements Selection {
         return new Coordinate(x_lower + ( x_upper - x_lower ) , y_lower + ( y_upper - y_lower ));
     }
 
+    public int width() {
+        return this.x_upper-this.x_lower;
+    }
+
+    public int height() {
+        return this.y_upper-this.y_lower;
+    }
+
     /**
      * @return A stream of the coordinates covered by this range.
      */

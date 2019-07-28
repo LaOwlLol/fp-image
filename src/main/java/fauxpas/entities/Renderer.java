@@ -23,6 +23,6 @@ import java.util.stream.Stream;
 
 public interface Renderer {
 
-    BufferedImage render(Stream<Pixel> sample);
+    BufferedImage render(Stream<Pixel> sample, int width, int height);
 
 }

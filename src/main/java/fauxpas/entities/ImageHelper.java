@@ -36,7 +36,11 @@ public class ImageHelper {
         return buffer;
     }
 
-    public static Stream<Pixel> BufferToPixelSample(BufferedImage buffer) {
-        return new Sample().get(buffer);
+    public static Stream<Pixel> SampleImage(BufferedImage buffer) {
+        return SampleImage(buffer, null);
+    }
+
+    public static Stream<Pixel> SampleImage(BufferedImage buffer, Selection selection) {
+        return new Sample(selection).get(buffer);
     }
 }

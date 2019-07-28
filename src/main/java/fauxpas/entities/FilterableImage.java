@@ -21,6 +21,10 @@ package fauxpas.entities;
 import fauxpas.filters.Filter;
 
 import java.awt.image.BufferedImage;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Stack;
+import java.util.stream.Stream;
 
 /**
  * A wrapper for javafx.scene.image.Image to apply fauxpas.filters to.
@@ -30,6 +34,8 @@ public class FilterableImage {
     private int width;
     private int height;
     private BufferedImage maintainedImage;
+    private Renderer renderer;
+    private Deque<Filter> filters;
 
     /**
      * Construct with dimensions.
@@ -37,9 +43,7 @@ public class FilterableImage {
      * @param height vertical dimension
      */
     public FilterableImage(int width, int height) {
-        this.width = width;
-        this.height = height;
-        this.maintainedImage = ImageHelper.AllocateARGBBuffer(this.width, this.height);
+        this(ImageHelper.AllocateARGBBuffer(width, height));
     }
 
     /**
@@ -47,9 +51,24 @@ public class FilterableImage {
      * @param maintainedImage The image to wrap.
      */
     public FilterableImage(BufferedImage maintainedImage) {
+        this(maintainedImage, ImageHelper::ARGBBufferRenderer);
+    }
+
+    public FilterableImage(BufferedImage maintainedImage, Renderer renderer) {
         this.width = maintainedImage.getWidth();
         this.height = maintainedImage.getHeight();
         this.maintainedImage = maintainedImage;
+        this.renderer = renderer;
+        this.filters = new ArrayDeque<Filter>() {
+        };
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
     }
 
     /**
@@ -70,37 +89,32 @@ public class FilterableImage {
         this.maintainedImage = image;
     }
 
-    /*
-    *//**
-     * Get color of a pixel of the image.
-     * @param x coordinate of the pixel to get
-     * @param y coordinate of the pixel to get
-     * @return color of pixel;
-     *//*
-    public int getPixelColor(int x, int y) {
-        return maintainedImage.getRGB(x, y);
-    }
-
-    *//**
-     * Get color of a pixel in the image.
-     * @param coordinate of the pixel to get
-     * @return color of pixel;
-     *//*
-    public int getPixelColor(Coordinate coordinate) {
-        return maintainedImage.getRGB(coordinate.x(), coordinate.y());
-    }*/
-
     /**
      * Apply an filter to the wrapped image.
      * @param filter to apply
      */
     public void applyFilter(Filter filter) {
+        filters.addLast(filter);
+    }
+
+    public BufferedImage render(Selection selection) {
         if (this.maintainedImage == null) {
             this.maintainedImage = ImageHelper.AllocateARGBBuffer(this.width, this.height);
         }
-        this.maintainedImage = ImageHelper.ARGBBufferRenderer(
-            filter.apply( ImageHelper.BufferToPixelSample(this.maintainedImage) ), this.width, this.height
-        );
+
+        if (filters.size() == 0) {
+            return this.maintainedImage;
+        }
+
+        Stack<Stream<Pixel>> image = new Stack<>();
+        image.push(ImageHelper.SampleImage( this.maintainedImage, selection ));
+
+        filters.stream().sorted().forEach( f -> {
+            image.push( f.apply(image.pop()) ) ;
+        } );
+
+
+        return this.renderer.render(image.pop(), this.width, this.height);
     }
 
 }
